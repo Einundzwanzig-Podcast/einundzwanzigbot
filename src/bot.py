@@ -50,6 +50,6 @@ def run(bot_token: str):
     dispatcher.add_handler(taproot_handler)
 
     j = updater.job_queue
-    j.run_repeating(taproot_signalling_blocks, interval=60, first=0.1)
+    j.run_repeating(taproot_signalling_blocks, interval=60, first=2)
 
     updater.start_polling()
