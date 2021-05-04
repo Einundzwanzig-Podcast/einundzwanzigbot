@@ -1,13 +1,20 @@
 import requests
-from typing import List, Any
+from typing import List, Any, Optional
 from telegram.ext.callbackcontext import CallbackContext
 import config
 
 def fetch_latest_blocks() -> List[Any]:
+    """
+    Get the latest Taproot block statistics using the API
+    from https://taproot.watch
+    """
     r = requests.get('https://taproot.watch/blocks')
     return r.json()
 
 def new_miner_signalling(context: CallbackContext):
+    """
+    Sends a message to chat if a new miner starts signalling for Taproot
+    """
 
     blocks = fetch_latest_blocks()
 
@@ -26,7 +33,10 @@ def new_miner_signalling(context: CallbackContext):
     if amount > 1:
         context.bot.send_message(chat_id=config.einundzwanzig_chat_id, text=f"<b>Neue Miner signalisieren Taproot!</b>\n{', '.join([str(x) + ' ✅' for x in new_signalling_miners])}", parse_mode='HTML')
 
-def taproot_signalling_blocks(context: CallbackContext):
+def taproot_signalling_blocks(context: Optional[CallbackContext]):
+    """
+    Calculate how many blocks are signalling
+    """
 
     blocks = fetch_latest_blocks()
 
@@ -43,5 +53,3 @@ def taproot_signalling_blocks(context: CallbackContext):
                     config.signalling_miners.append(block['miner'])
             else:
                 config.signal_false += 1
-    
-    # new_miner_signalling(context)
