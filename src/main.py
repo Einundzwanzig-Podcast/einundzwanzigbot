@@ -20,6 +20,12 @@ def main():
         # Use default defined in config
         pass
 
+    try:
+        config.MEMPOOL_SPACE_URL = os.environ['MEMPOOL_SPACE_URL']
+    except KeyError:
+        # Use default defined in config
+        pass
+
     run(bot_token)
 
 
