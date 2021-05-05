@@ -44,12 +44,32 @@ def taproot_signalling_blocks(context: Optional[CallbackContext]):
     config.signal_true = 0
     config.signal_false = 0
 
+    config.miner_stats = {}
+
     for block in blocks:
+
         if 'signals' in block:
+
+            if 'miner' not in block:
+                block['miner'] = 'Unbekannt'
+
+            # Add miner to stats if not already added
+            if not block['miner'] in config.miner_stats.keys():
+                config.miner_stats[block['miner']] = { 
+                    'signal_true': 0,
+                    'signal_false': 0,
+                    'blocks_mined': 0
+                }
+
             config.blocks_mined += 1
+            config.miner_stats[block['miner']]['blocks_mined'] += 1
+
             if block['signals'] == True:
                 config.signal_true += 1
+                config.miner_stats[block['miner']]['signal_true'] += 1
+
                 if block['miner'] not in config.signalling_miners:
                     config.signalling_miners.append(block['miner'])
             else:
                 config.signal_false += 1
+                config.miner_stats[block['miner']]['signal_false'] += 1
