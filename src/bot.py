@@ -3,6 +3,7 @@ from telegram.ext import Updater, CommandHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
 from taproot import taproot_calculate_signalling_statistics
+from mempool import mempool_space_fees, blockzeit
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -17,6 +18,18 @@ def taproot_command(update: Update, context: CallbackContext):
     """
     taproot_calculate_signalling_statistics(update, context)
 
+def fee_command(update: Update, context: CallbackContext):
+    """
+    Get fees for next blocks from mempool.space
+    """
+    mempool_space_fees(update, context)
+
+def blockzeit_command(update: Update, context: CallbackContext):
+    """
+    Get the current block time (block height)
+    """
+    blockzeit(update, context)
+
 def run(bot_token: str):
     """
     Starts the bot
@@ -29,8 +42,12 @@ def run(bot_token: str):
 
     start_handler = CommandHandler('start', start_command)
     taproot_handler = CommandHandler('taproot', taproot_command)
+    fee_handler = CommandHandler('fee', fee_command)
+    blockzeit_handler = CommandHandler('blockzeit', blockzeit_command)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
+    dispatcher.add_handler(fee_handler)
+    dispatcher.add_handler(blockzeit_handler)
 
     updater.start_polling()
