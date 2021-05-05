@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 from bot import run
+import config
 
 # Main entrypoint
 def main():
@@ -12,6 +13,12 @@ def main():
     except KeyError:
         print('The environment variable BOT_TOKEN is not defined')
         exit(1)
+
+    try:
+        config.taproot_watch_url = os.environ['TAPROOT_WATCH_URL']
+    except KeyError:
+        # Use default defined in config
+        pass
 
     run(bot_token)
 
