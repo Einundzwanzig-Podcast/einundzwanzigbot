@@ -8,7 +8,7 @@ def fetch_latest_blocks() -> List[Any]:
     Get the latest Taproot block statistics using the API
     from https://taproot.watch
     """
-    r = requests.get('https://taproot.watch/blocks')
+    r = requests.get(f'{config.taproot_watch_url}/blocks')
     return r.json()
 
 def new_miner_signalling(context: CallbackContext):

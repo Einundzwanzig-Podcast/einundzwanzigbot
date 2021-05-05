@@ -3,4 +3,5 @@ services:
     einundzwanzigbot:
         build: .
         environment: 
-            - BOT_TOKEN=xxx
+            - BOT_TOKEN=xxx # Bot token obtained from Bot Father
+            - TAPROOT_WATCH_URL=https://taproot.watch # URL of the Taproot Watch instance (optional, default: https://taproot.watch)
