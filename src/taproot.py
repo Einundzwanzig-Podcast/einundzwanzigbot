@@ -7,6 +7,9 @@ from telegram.update import Update
 import config
 
 class TaprootStats:
+    """
+    Wrapper class for taproot stats
+    """
     def __init__(self) -> None:
         # List of all signalling miners
         self.signalling_miners: List[str] = []
