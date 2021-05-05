@@ -15,7 +15,7 @@ def main():
         exit(1)
 
     try:
-        config.taproot_watch_url = os.environ['TAPROOT_WATCH_URL']
+        config.TAPROOT_WATCH_URL = os.environ['TAPROOT_WATCH_URL']
     except KeyError:
         # Use default defined in config
         pass

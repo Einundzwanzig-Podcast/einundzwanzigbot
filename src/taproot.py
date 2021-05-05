@@ -25,7 +25,7 @@ def fetch_latest_blocks() -> List[Any]:
     Get the latest Taproot block statistics using the API
     from https://taproot.watch
     """
-    r = requests.get(f'{config.taproot_watch_url}/blocks')
+    r = requests.get(f'{config.TAPROOT_WATCH_URL}/blocks')
     return r.json()
 
 def new_miner_signalling(context: CallbackContext, taprootStats: TaprootStats):
@@ -45,10 +45,10 @@ def new_miner_signalling(context: CallbackContext, taprootStats: TaprootStats):
     amount = len(new_signalling_miners)
     
     if amount == 1:
-        context.bot.send_message(chat_id=config.einundzwanzig_chat_id, text=f"<b>Ein neuer Miner signalisiert Taproot!</b>\n{new_signalling_miners[0]} ✅", parse_mode='HTML')
+        context.bot.send_message(chat_id=config.EINUNDZWANZIG_CHAT_ID, text=f"<b>Ein neuer Miner signalisiert Taproot!</b>\n{new_signalling_miners[0]} ✅", parse_mode='HTML')
     
     if amount > 1:
-        context.bot.send_message(chat_id=config.einundzwanzig_chat_id, text=f"<b>Neue Miner signalisieren Taproot!</b>\n{', '.join([str(x) + ' ✅' for x in new_signalling_miners])}", parse_mode='HTML')
+        context.bot.send_message(chat_id=config.EINUNDZWANZIG_CHAT_ID, text=f"<b>Neue Miner signalisieren Taproot!</b>\n{', '.join([str(x) + ' ✅' for x in new_signalling_miners])}", parse_mode='HTML')
 
 def taproot_signalling_blocks() -> TaprootStats:
     """
