@@ -64,10 +64,13 @@ def run(bot_token: str):
 
     if config.USE_WEBHOOK:
         updater.start_webhook(
-            listen=config.WEBHOOK_URL,
+            listen='0.0.0.0',
             port=config.WEBHOOK_PORT,
+            webhook_url=f'https://{config.WEBHOOK_URL}:{config.WEBHOOK_PORT}/{bot_token}',
+            url_path=bot_token,
             cert='cert.pem',
             key='private.key'
         )
+        updater.idle()
     else:
         updater.start_polling()
