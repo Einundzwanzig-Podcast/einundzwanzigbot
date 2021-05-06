@@ -32,3 +32,16 @@ The bot will start up and automatically receive updates and respond to messages.
 
 You can also use docker for local development and/or deployment, see the 
 `Dockerfile` and `docker-compose.yml` for details
+
+## Webhook
+
+If you want to set up a webhook for the bot you need to specify the following environment variables:
+* `USE_WEBHOOK` True if you want to use webhooks
+* `WEBHOOK_URL` FQDN of the server (e.g. example.com, 8.8.8.8)
+* `WEBHOOK_PORT` Port to use, can be any of 80, 88, 443, 8443
+
+Make sure you create a self-signed certifcate first and place them in the root folder.
+The key must be named `private.key` and the cert `cert.pem`.
+
+If you are using docker, the certificate will be generated for you.
+Have a look at the `Dockerfile` and `docker-compose.yml` for more details.
