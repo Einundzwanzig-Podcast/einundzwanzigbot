@@ -6,8 +6,6 @@ import config
 # Main entrypoint
 def main():
 
-    bot_token: Optional[str] = None
-
     try:
         bot_token = os.environ['BOT_TOKEN']
     except KeyError:
@@ -22,6 +20,19 @@ def main():
 
     try:
         config.MEMPOOL_SPACE_URL = os.environ['MEMPOOL_SPACE_URL']
+    except KeyError:
+        # Use default defined in config
+        pass
+
+    try:
+        config.USE_WEBHOOK = bool(os.environ['USE_WEBHOOK'])
+        if config.USE_WEBHOOK:
+            try:
+                config.WEBHOOK_URL = os.environ['WEBHOOK_URL']
+                config.WEBHOOK_PORT = int(os.environ['WEBHOOK_PORT'])
+            except KeyError:
+                print('If USE_WEBHOOK is true, you also need to supply WEBHOOK_URL and WEBHOOK_PORT')
+                exit(1)
     except KeyError:
         # Use default defined in config
         pass

@@ -2,6 +2,9 @@ import logging
 from telegram.ext import Updater, CommandHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
+
+import config
+
 from taproot import taproot_calculate_signalling_statistics
 from mempool import mempool_space_fees, blockzeit
 from price import moskauzeit
@@ -59,4 +62,15 @@ def run(bot_token: str):
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
 
-    updater.start_polling()
+    if config.USE_WEBHOOK:
+        updater.start_webhook(
+            listen='0.0.0.0',
+            port=config.WEBHOOK_PORT,
+            webhook_url=f'https://{config.WEBHOOK_URL}:{config.WEBHOOK_PORT}/{bot_token}',
+            url_path=bot_token,
+            cert='cert.pem',
+            key='private.key'
+        )
+        updater.idle()
+    else:
+        updater.start_polling()
