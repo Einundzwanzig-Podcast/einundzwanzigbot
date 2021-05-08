@@ -62,7 +62,7 @@ def run(bot_token: str):
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
 
-    if config.USE_WEBHOOK:
+    if config.USE_WEBHOOK == 'true':
         updater.start_webhook(
             listen='0.0.0.0',
             port=config.WEBHOOK_PORT,
