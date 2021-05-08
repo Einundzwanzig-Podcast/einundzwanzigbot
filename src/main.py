@@ -25,8 +25,8 @@ def main():
         pass
 
     try:
-        config.USE_WEBHOOK = str.lower(os.environ['USE_WEBHOOK'])
-        if config.USE_WEBHOOK == 'true':
+        config.USE_WEBHOOK = True if str.lower(os.environ['USE_WEBHOOK']) == 'true' else False
+        if config.USE_WEBHOOK:
             try:
                 config.WEBHOOK_URL = os.environ['WEBHOOK_URL']
                 config.WEBHOOK_PORT = int(os.environ['WEBHOOK_PORT'])
