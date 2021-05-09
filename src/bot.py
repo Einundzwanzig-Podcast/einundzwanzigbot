@@ -7,7 +7,7 @@ from telegram.update import Update
 import config
 
 from taproot import taproot_calculate_signalling_statistics
-from mempool import mempool_space_fees, blockzeit
+from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import moskauzeit
 
 @run_async
@@ -31,6 +31,13 @@ def fee_command(update: Update, context: CallbackContext):
     Get fees for next blocks from mempool.space
     """
     mempool_space_fees(update, context)
+
+@run_async
+def mempool_command(update: Update, context: CallbackContext):
+    """
+    Get current mempool stats
+    """
+    mempool_space_mempool_stats(update, context)
 
 @run_async
 def blockzeit_command(update: Update, context: CallbackContext):
@@ -59,12 +66,14 @@ def run(bot_token: str):
     start_handler = CommandHandler('start', start_command)
     taproot_handler = CommandHandler('taproot', taproot_command)
     fee_handler = CommandHandler('fee', fee_command)
+    mempool_handler = CommandHandler('mempool', mempool_command)
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
     dispatcher.add_handler(fee_handler)
+    dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
 

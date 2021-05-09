@@ -36,6 +36,70 @@ def mempool_space_fees(update: Update, _: CallbackContext):
 
     update.message.reply_text(message, parse_mode='HTML')
 
+def fee_emoji(fee: float) -> str:
+    """
+    Returns an emoji depending on the fee
+    """
+    if fee > 100:
+        return '🟥'
+    if fee > 30:
+        return '🟧'
+    if fee > 10:
+        return '🟨'
+    return '🟩'
+
+def mempool_space_mempool_stats(update: Update, context: CallbackContext):
+    """
+    Mempool statistics from mempool space
+    """
+
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/mempool', timeout=5)
+        mempool = r.json()
+    except:
+        update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/fees/mempool-blocks', timeout=5)
+        blocks = r.json()
+    except:
+        update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+
+    try:
+        num_blocks = int(context.args[0])
+    except:
+        num_blocks = 3
+
+    if num_blocks <= 0:
+        num_blocks = 1
+
+    message = dedent(f"""
+    <b>Mempool</b>
+    Anzahl: {'{0:,.0f}'.format(mempool['count'])} tx
+    Backlog: {mempool['vsize'] / 1_000_000:.1f} vMB
+    """)
+
+    for index, block in enumerate(blocks):
+        fee_range = block['feeRange']
+
+        try:
+            min_fee = fee_range[0]
+            max_fee = fee_range[-1]
+        except:
+            min_fee = 1.0
+            max_fee = 1.0
+
+        if index <= num_blocks - 1:
+            message += dedent(f"""
+            <i>Block {index+1} (In ~{(index+1) * 10} min)</i>
+            {fee_emoji(max_fee)} Max: {max_fee:.1f} sat/vbyte 
+            {fee_emoji(min_fee)} Min: {min_fee:.1f} sat/vbyte
+            """)
+
+    update.message.reply_text(text=message, parse_mode='HTML')
+
 def blockzeit(update: Update, _: CallbackContext):
     """
     Returns the current block time (block height)
