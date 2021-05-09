@@ -1,6 +1,7 @@
 import logging
 from telegram.ext import Updater, CommandHandler
 from telegram.ext.callbackcontext import CallbackContext
+from telegram.ext.dispatcher import run_async
 from telegram.update import Update
 
 import config
@@ -9,6 +10,7 @@ from taproot import taproot_calculate_signalling_statistics
 from mempool import mempool_space_fees, blockzeit
 from price import moskauzeit
 
+@run_async
 def start_command(update: Update, context: CallbackContext):
     """
     Sends a welcome message to the user
@@ -16,24 +18,28 @@ def start_command(update: Update, context: CallbackContext):
     """
     context.bot.send_message(chat_id=update.effective_chat.id, text="Hi, ich bin der Einundzwanzig Community Bot!")
 
+@run_async
 def taproot_command(update: Update, context: CallbackContext):
     """
     Calculates Taproot Activation Statistics
     """
     taproot_calculate_signalling_statistics(update, context)
 
+@run_async
 def fee_command(update: Update, context: CallbackContext):
     """
     Get fees for next blocks from mempool.space
     """
     mempool_space_fees(update, context)
 
+@run_async
 def blockzeit_command(update: Update, context: CallbackContext):
     """
     Get the current block time (block height)
     """
     blockzeit(update, context)
 
+@run_async
 def moskauzeit_command(update: Update, context: CallbackContext):
     """
     Get the current moscow time (sat/USD and sat/EUR)
