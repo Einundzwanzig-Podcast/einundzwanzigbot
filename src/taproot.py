@@ -25,15 +25,17 @@ def fetch_latest_blocks() -> List[Any]:
     Get the latest Taproot block statistics using the API
     from https://taproot.watch
     """
-    r = requests.get(f'{config.TAPROOT_WATCH_URL}/blocks')
+    r = requests.get(f'{config.TAPROOT_WATCH_URL}/blocks', timeout=5)
     return r.json()
 
 def new_miner_signalling(context: CallbackContext, taprootStats: TaprootStats):
     """
     Sends a message to chat if a new miner starts signalling for Taproot
     """
-
-    blocks = fetch_latest_blocks()
+    try:
+        blocks = fetch_latest_blocks()
+    except:
+        return
 
     new_signalling_miners: List[str] = []
 
@@ -111,7 +113,11 @@ def taproot_calculate_signalling_statistics(update: Update, context: CallbackCon
     Calculates Taproot Activation Statistics
     """
 
-    taprootStats = taproot_signalling_blocks()
+    try:
+        taprootStats = taproot_signalling_blocks()
+    except:
+        update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
     
     try:
 

@@ -14,8 +14,12 @@ def mempool_space_fees(update: Update, _: CallbackContext):
     """
     Recommended fees from mempool space
     """
-    r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/fees/recommended')
-    json = r.json()
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/fees/recommended', timeout=5)
+        json = r.json()
+    except:
+        update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
 
     fees = MempoolSpaceFees(
         one_block_fee=json['fastestFee'],
@@ -36,8 +40,12 @@ def blockzeit(update: Update, _: CallbackContext):
     """
     Returns the current block time (block height)
     """
-    r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height')
-    height = r.json()
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height', timeout=5)
+        height = r.json()
+    except:
+        update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
 
     message = dedent(f"""
     <b>Aktuelle Blockzeit</b>

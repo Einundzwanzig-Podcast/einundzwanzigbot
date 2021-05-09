@@ -10,7 +10,7 @@ def get_coinbase_price(fiat: str = 'USD') -> float:
     """
     Get the current BTC-USD spot exchange rate
     """
-    r = requests.get(f'https://api.coinbase.com/v2/prices/spot?currency={fiat}')
+    r = requests.get(f'https://api.coinbase.com/v2/prices/spot?currency={fiat}', timeout=5)
     json = r.json()
     return float(json['data']['amount'])
 
@@ -43,7 +43,11 @@ def price_update_ath(context: CallbackContext) -> None:
     Gets the current price, compares it to the price in the database and
     sends a message if a new ATH was reached
     """
-    price = get_coinbase_price()
+    try:
+        price = get_coinbase_price()
+    except:
+        price = 0.0
+
     new_ath = save_price_to_db(price)
 
     price_formatted = '{0:,.2f}'.format(price)
