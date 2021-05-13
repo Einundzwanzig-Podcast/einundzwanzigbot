@@ -114,6 +114,11 @@ def taproot_calculate_signalling_statistics(update: Update, context: CallbackCon
     """
 
     try:
+        show_non_signalling_mining_pools = True if context.args[0] == 'all' else False
+    except:
+        show_non_signalling_mining_pools = False
+
+    try:
         taprootStats = taproot_signalling_blocks()
     except:
         update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
@@ -172,6 +177,9 @@ def taproot_calculate_signalling_statistics(update: Update, context: CallbackCon
             if miner_signal_true > 0:
                 total_signalling_hashrate += part_of_hashrate
                 message += dedent(f"{miner} ✅ ({miner_signal_true} / {miner_signal_total}) Hash: {part_of_hashrate * 100:.1f}%\n")
+            else:
+                if show_non_signalling_mining_pools:
+                    message += dedent(f"{miner} ❌ ({miner_signal_true} / {miner_signal_total}) Hash: {part_of_hashrate * 100:.1f}%\n")
 
         message += dedent(f"\n<b>Summe Hash: {total_signalling_hashrate * 100:.1f}%</b>")
 
