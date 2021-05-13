@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 from bot import run
 import config
 
@@ -33,6 +32,21 @@ def main():
             except KeyError:
                 print('If USE_WEBHOOK is true, you also need to supply WEBHOOK_URL and WEBHOOK_PORT')
                 exit(1)
+    except KeyError:
+        # Use default defined in config
+        pass
+
+    try:
+        config.FEATURE_ATH = True if str.lower(os.environ['FEATURE_ATH']) == 'true' else False
+        if config.FEATURE_ATH:
+            try:
+                config.FEATURE_ATH_CHAT_ID = int(os.environ['FEATURE_ATH_CHAT_ID'])
+            except KeyError:
+                pass
+            try:
+                config.FEATURE_ATH_MANUAL_LAST_ATH = float(os.environ['FEATURE_ATH_MANUAL_LAST_ATH'])
+            except KeyError:
+                pass
     except KeyError:
         # Use default defined in config
         pass
