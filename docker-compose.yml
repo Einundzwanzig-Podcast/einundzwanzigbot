@@ -5,6 +5,8 @@ services:
             context: .
             args: 
                 - WEBHOOK_URL_SELF_SIGNED_CERT=example.com # Needed to generate the self-signed SSL cert. Keep in mind that you need to re-build if your webhook url changes!
+        volumes:
+            - "./db:/app/db"
         environment: 
             - BOT_TOKEN=xxx # Bot token obtained from Bot Father
             - TAPROOT_WATCH_URL=https://taproot.watch # URL of the Taproot Watch instance (optional, default: https://taproot.watch)
@@ -12,3 +14,6 @@ services:
             - USE_WEBHOOK=False # If webhooks should be used (optional, default: False)
             - WEBHOOK_URL=example.com # FQDN for the webhook (optional, only needed if USE_WEBHOOK is True)
             - WEBHOOK_PORT=8443 # Webhook port. Can only be one of 80, 88, 443, 8443. See Telegram docs for more info. (optional, only needed if USE_WEBHOOK is True)
+            - FEATURE_ATH=False # All time high price feature (optional, default: False)
+            - FEATURE_ATH_CHAT_ID=-1001427443561 # Telegram chat id of the chat where the ATH message should be sent to (optional, default: EINUNDZWANZIG CHAT)
+            - FEATURE_ATH_MANUAL_LAST_ATH=0.0 # Set a manual last ATH !!! This only works if the database has not already been created !!! (optional: default: 0.0)

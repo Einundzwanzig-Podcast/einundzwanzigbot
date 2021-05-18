@@ -14,29 +14,36 @@ def get_coinbase_price(fiat: str = 'USD') -> float:
     json = r.json()
     return float(json['data']['amount'])
 
-def save_price_to_db(price: float) -> bool:
- 
+def get_last_ath_price_and_message_id() -> Tuple[float, int]:
+    """
+    Returns the last ATH price with the message id it was sent with
+    This message id can then be used to delete the message
+    """
+
     connection = get_connection()
     cur = connection.cursor()
 
-    previous_price = cur.execute('SELECT price_usd FROM price WHERE 1').fetchone()
+    previous_price = cur.execute('SELECT price_usd, last_message_id FROM price WHERE 1').fetchone()
+    connection.close()
 
     if previous_price == None:
-        previous_price = 0.0
-    else:
-        previous_price = previous_price[0]
+        previous_price = (0.0, 0)
 
-    if previous_price >= price:
-        connection.close()
-        return False
-    else:
-        cur.execute('DELETE FROM price WHERE 1')
-        cur.execute('INSERT INTO price (price_usd) VALUES (?)', (price,))
+    return previous_price  
 
-        connection.commit()
-        connection.close()
+def save_price_to_db(price: float, last_message_id: int) -> None:
+    """
+    Saves the new ATH price to the database
+    """
 
-        return True
+    connection = get_connection()
+    cur = connection.cursor()
+ 
+    cur.execute('DELETE FROM price WHERE 1')
+    cur.execute('INSERT INTO price (price_usd, last_message_id) VALUES (?, ?)', (price, last_message_id))
+
+    connection.commit()
+    connection.close()
 
 def price_update_ath(context: CallbackContext) -> None:
     """
@@ -48,16 +55,46 @@ def price_update_ath(context: CallbackContext) -> None:
     except:
         price = 0.0
 
-    new_ath = save_price_to_db(price)
+    (last_ath_price, last_message_id) = get_last_ath_price_and_message_id()
 
-    price_formatted = '{0:,.2f}'.format(price)
+    new_ath = last_ath_price < price
 
-    if new_ath:
+    if not new_ath:
+        return
+    else:
+        price_formatted = '{0:,.2f}'.format(price)
+
         message = dedent(f"""
         <b>Neues Allzeithoch</b>
         {price_formatted} USD
         """)
-        context.bot.send_message(text=message, chat_id=config.EINUNDZWANZIG_CHAT_ID, parse_mode='HTML')
+        
+        # We try to delete the old message
+        # This only works if the message is less than 48 hours old
+        try:
+            context.bot.delete_message(chat_id=config.FEATURE_ATH_CHAT_ID, message_id=last_message_id)
+        except:
+            pass
+
+        sent_message = context.bot.send_message(text=message, chat_id=config.FEATURE_ATH_CHAT_ID, parse_mode='HTML')
+
+        save_price_to_db(price, sent_message.message_id)
+
+def preis(update: Update, _: CallbackContext):
+    """
+    Current Coinbase price
+    """
+
+    price_usd = get_coinbase_price('USD')
+    price_eur = get_coinbase_price('EUR')
+
+    message = dedent(f"""
+    <b>Preis</b>
+    {'{0:,.2f}'.format(price_usd)} USD/BTC
+    {'{0:,.2f}'.format(price_eur)} EUR/BTC
+    """)
+
+    update.message.reply_text(text=message, parse_mode='HTML')
 
 def moskauzeit(update: Update, _: CallbackContext):
     """
@@ -74,5 +111,6 @@ def moskauzeit(update: Update, _: CallbackContext):
     {sat_per_usd} SAT/USD
     {sat_per_eur} SAT/EUR
     """)
+
     update.message.reply_text(text=message, parse_mode='HTML')
 
