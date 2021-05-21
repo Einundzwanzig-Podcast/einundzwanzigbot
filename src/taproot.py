@@ -125,7 +125,16 @@ def taproot_show_blocks(blocks: List, amount: int) -> str:
             else:
                 block_emojis += '🟥'
 
-    message += block_emojis[-amount:]
+    block_emojis_last = block_emojis[-amount:]
+
+    try:
+        signals_true_percent = block_emojis_last.count('🟩') / (block_emojis_last.count('🟩') + block_emojis_last.count('🟥')) * 100
+    except:
+        signals_true_percent = 0.0
+
+    message += dedent(f"""<i>{signals_true_percent:.1f}% dieser signalisieren dafür</i>\n""")
+
+    message += block_emojis_last
 
     return message
 
