@@ -7,7 +7,7 @@ from telegram.update import Update
 import config
 
 from database import setup_database
-from taproot import taproot_calculate_signalling_statistics
+from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import moskauzeit, preis, price_update_ath
 
@@ -22,7 +22,7 @@ def taproot_command(update: Update, context: CallbackContext):
     """
     Calculates Taproot Activation Statistics
     """
-    taproot_calculate_signalling_statistics(update, context)
+    taproot_handle_command(update, context)
 
 def fee_command(update: Update, context: CallbackContext):
     """
