@@ -52,12 +52,10 @@ def new_miner_signalling(context: CallbackContext, taprootStats: TaprootStats):
     if amount > 1:
         context.bot.send_message(chat_id=config.EINUNDZWANZIG_CHAT_ID, text=f"<b>Neue Miner signalisieren Taproot!</b>\n{', '.join([str(x) + ' ✅' for x in new_signalling_miners])}", parse_mode='HTML')
 
-def taproot_signalling_blocks() -> TaprootStats:
+def taproot_signalling_blocks(blocks: List) -> TaprootStats:
     """
     Calculate how many blocks are signalling
     """
-
-    blocks = fetch_latest_blocks()
 
     taprootStats = TaprootStats()
 
@@ -108,80 +106,135 @@ def sort_by_part_of_hashrate(item, taprootStats: TaprootStats):
 
     return part_of_hashrate
 
-def taproot_calculate_signalling_statistics(update: Update, context: CallbackContext):
+def taproot_show_blocks(blocks: List, amount: int) -> str:
+    """
+    Show Taproot blocks
+    """
+
+    message = dedent(f"""
+    <b>Blöcke</b>
+    <i>Letzte {amount} in dieser Epoche</i>
+    """)
+
+    block_emojis = ''
+
+    for block in blocks:
+        if 'signals' in block:
+            if block['signals'] == True:
+                block_emojis += '🟩'
+            else:
+                block_emojis += '🟥'
+
+    message += block_emojis[-amount:]
+
+    return message
+
+def taproot_calculate_signalling_statistics(taprootStats: TaprootStats, show_non_signalling_mining_pools: bool = False) -> str:
     """
     Calculates Taproot Activation Statistics
     """
 
+    signalling_percentage = 0.0
+
+    # Prevent division by 0
+    if taprootStats.signal_true != 0:
+        signalling_percentage = taprootStats.signal_true / (taprootStats.signal_true + taprootStats.signal_false)
+
+    current_cycle_activation_possible = False if taprootStats.signal_false > 201 else True
+
+    activation_message = None
+
+    if not current_cycle_activation_possible:
+        activation_message = "Fehlgeschlagen 😭"
+    else: 
+        if taprootStats.signal_true >= 1815:
+            activation_message = "Erfolgreich 🎉🎉🎉"
+        else:
+            activation_message = "Möglich 🙏"
+
+    message = dedent(f"""
+    <b>Taproot Aktivierung</b>
+    Geschürfte Blöcke: {taprootStats.blocks_mined} / 2016
+    Benötigt: 1815 / 2016 (90%)
+    Signalisieren dafür: {taprootStats.signal_true} ({signalling_percentage * 100:.1f}%)
+    Signalisieren nicht: {taprootStats.signal_false} ({(1 - signalling_percentage) * 100:.1f}%)
+
+    <b>Aktueller Zyklus</b>
+    Aktivierung: {activation_message}
+
+    <b>Mining Pools</b>        
+    """)
+
+    total_signalling_hashrate = 0.0
+
+    # Sort by part of hash rate
+    miners_sorted = dict(sorted(taprootStats.miner_stats.items(), key=lambda item: sort_by_part_of_hashrate(item, taprootStats), reverse=True))
+
+    for miner in miners_sorted.keys():
+
+        miner_signal_true = taprootStats.miner_stats[miner]['signal_true']
+        miner_signal_false = taprootStats.miner_stats[miner]['signal_false']
+        miner_signal_total = miner_signal_true + miner_signal_false
+
+        # Prevent division by 0 if no blocks have been mined yet in the cycle
+        if taprootStats.blocks_mined == 0:
+            part_of_hashrate = 0
+        else:
+            part_of_hashrate = miner_signal_total / taprootStats.blocks_mined
+        
+        if miner_signal_true > 0:
+            total_signalling_hashrate += part_of_hashrate
+            message += dedent(f"{miner} ✅ ({miner_signal_true} / {miner_signal_total}) Hash: {part_of_hashrate * 100:.1f}%\n")
+        else:
+            if show_non_signalling_mining_pools:
+                message += dedent(f"{miner} ❌ ({miner_signal_true} / {miner_signal_total}) Hash: {part_of_hashrate * 100:.1f}%\n")
+
+    message += dedent(f"\n<b>Summe Hash: {total_signalling_hashrate * 100:.1f}%</b>")
+
+    return message
+
+def taproot_handle_command(update: Update, context: CallbackContext):
+    """
+    Command Handler for taproot command
+    """
+
+    # If the argument 'all' is sent with the command, we also show all mining pools that
+    # are current not signalling
     try:
         show_non_signalling_mining_pools = True if context.args[0] == 'all' else False
     except:
         show_non_signalling_mining_pools = False
 
+    # If the argument 'blocks' is provided, you will get all the latest blocks, but no
+    # information about the current activation
     try:
-        taprootStats = taproot_signalling_blocks()
+        show_only_blocks = True if context.args[0] == 'blocks' else False
+        try:
+            # 2016 is the whole epoch
+            if context.args[1] == 'all':
+                show_only_blocks_amount = 2016
+            else:
+                show_only_blocks_amount = int(context.args[1])
+                # Filter out invalid amounts
+                if show_only_blocks_amount < 1 or show_only_blocks_amount > 2016:
+                    show_only_blocks_amount = 144
+        except:
+            show_only_blocks_amount = 144
+    except:
+        show_only_blocks = False
+
+    try:
+        blocks = fetch_latest_blocks()
     except:
         update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
     
     try:
-
-        signalling_percentage = 0.0
-
-        # Prevent division by 0
-        if taprootStats.signal_true != 0:
-            signalling_percentage = taprootStats.signal_true / (taprootStats.signal_true + taprootStats.signal_false)
-
-        current_cycle_activation_possible = False if taprootStats.signal_false > 201 else True
-
-        activation_message = None
-
-        if not current_cycle_activation_possible:
-            activation_message = "Fehlgeschlagen 😭"
-        else: 
-            if taprootStats.signal_true >= 1815:
-                activation_message = "Erfolgreich 🎉🎉🎉"
-            else:
-                activation_message = "Möglich 🙏"
-
-        message = dedent(f"""
-        <b>Taproot Aktivierung</b>
-        Geschürfte Blöcke: {taprootStats.blocks_mined} / 2016
-        Benötigt: 1815 / 2016 (90%)
-        Signalisieren dafür: {taprootStats.signal_true} ({signalling_percentage * 100:.1f}%)
-        Signalisieren nicht: {taprootStats.signal_false} ({(1 - signalling_percentage) * 100:.1f}%)
-
-        <b>Aktueller Zyklus</b>
-        Aktivierung: {activation_message}
-
-        <b>Mining Pools</b>        
-        """)
-
-        total_signalling_hashrate = 0.0
-
-        # Sort by part of hash rate
-        miners_sorted = dict(sorted(taprootStats.miner_stats.items(), key=lambda item: sort_by_part_of_hashrate(item, taprootStats), reverse=True))
-
-        for miner in miners_sorted.keys():
-
-            miner_signal_true = taprootStats.miner_stats[miner]['signal_true']
-            miner_signal_false = taprootStats.miner_stats[miner]['signal_false']
-            miner_signal_total = miner_signal_true + miner_signal_false
-
-            # Prevent division by 0 if no blocks have been mined yet in the cycle
-            if taprootStats.blocks_mined == 0:
-                part_of_hashrate = 0
-            else:
-                part_of_hashrate = miner_signal_total / taprootStats.blocks_mined
-            
-            if miner_signal_true > 0:
-                total_signalling_hashrate += part_of_hashrate
-                message += dedent(f"{miner} ✅ ({miner_signal_true} / {miner_signal_total}) Hash: {part_of_hashrate * 100:.1f}%\n")
-            else:
-                if show_non_signalling_mining_pools:
-                    message += dedent(f"{miner} ❌ ({miner_signal_true} / {miner_signal_total}) Hash: {part_of_hashrate * 100:.1f}%\n")
-
-        message += dedent(f"\n<b>Summe Hash: {total_signalling_hashrate * 100:.1f}%</b>")
+        if show_only_blocks:
+            message = taproot_show_blocks(blocks, show_only_blocks_amount)
+        else:
+            taprootStats = taproot_signalling_blocks(blocks)
+            message = taproot_calculate_signalling_statistics(taprootStats, show_non_signalling_mining_pools)
 
         context.bot.send_message(chat_id=update.effective_chat.id, text=message, parse_mode='HTML', disable_web_page_preview=True)
 
