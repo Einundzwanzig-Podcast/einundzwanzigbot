@@ -1,4 +1,5 @@
 import logging
+from textwrap import dedent
 from telegram.ext import Updater, CommandHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.ext.dispatcher import run_async
@@ -7,7 +8,7 @@ from telegram.update import Update
 import config
 
 from database import setup_database
-from taproot import taproot_handle_command
+from taproot import taproot_blocks_handle_command, taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import moskauzeit, preis, price_update_ath
 
@@ -16,13 +17,35 @@ def start_command(update: Update, context: CallbackContext):
     Sends a welcome message to the user
     Should be customized in the future
     """
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Hi, ich bin der Einundzwanzig Community Bot!")
+
+    welcome_message = dedent("""
+    Hi, ich bin der Einundzwanzig Bot, der offizielle Telegram Bot des Einundzwanzig Bitcoin Podcasts.
+
+    Du findest den Podcast bei allen gängigen Podcast Apps, oder unter https://einundzwanzig.space.
+
+    Kommandos:
+    /taproot - Taproot Aktivierungs-Statistiken. Wenn als erster Argument <i>all</i> übergeben wird, werden auch nicht-signalisierende Pools angezeigt.
+    /taprootblocks - Aktuell signalisierende Taproot Blöcke.
+    /fee - Aktuelle Transaktionsgebühren.
+    /mempool - Mempool Visualisierung. Ersters Argument ist die Zahl der Mempool Blöcke, max <i>8</i>.
+    /preis - Preis in USD und EUR.
+    /blockzeit - Aktuelle Blockzeit.
+    /moskauzeit - SAT per USD und SAT per EUR.
+    """)
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
 
 def taproot_command(update: Update, context: CallbackContext):
     """
     Calculates Taproot Activation Statistics
     """
     taproot_handle_command(update, context)
+
+def taproot_blocks_command(update: Update, context: CallbackContext):
+    """
+    Shows Taproot signalling blocks
+    """
+    taproot_blocks_handle_command(update, context)
 
 def fee_command(update: Update, context: CallbackContext):
     """
@@ -68,6 +91,7 @@ def run(bot_token: str):
 
     start_handler = CommandHandler('start', start_command, run_async=True)
     taproot_handler = CommandHandler('taproot', taproot_command, run_async=True)
+    taproot_blocks_handler = CommandHandler('taprootblocks', taproot_blocks_command, run_async=True)
     fee_handler = CommandHandler('fee', fee_command, run_async=True)
     mempool_handler = CommandHandler('mempool', mempool_command, run_async=True)
     preis_handler = CommandHandler('preis', preis_command, run_async=True)
@@ -76,6 +100,7 @@ def run(bot_token: str):
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
+    dispatcher.add_handler(taproot_blocks_handler)
     dispatcher.add_handler(fee_handler)
     dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(preis_handler)
