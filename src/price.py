@@ -80,7 +80,7 @@ def price_update_ath(context: CallbackContext) -> None:
 
         save_price_to_db(price, sent_message.message_id)
 
-def preis(update: Update, _: CallbackContext):
+def preis(update: Update, context: CallbackContext):
     """
     Current Coinbase price
     """
@@ -94,9 +94,9 @@ def preis(update: Update, _: CallbackContext):
     {'{0:,.2f}'.format(price_eur)} EUR/BTC
     """)
 
-    update.message.reply_text(text=message, parse_mode='HTML')
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
 
-def moskauzeit(update: Update, _: CallbackContext):
+def moskauzeit(update: Update, context: CallbackContext):
     """
     Get the current price in satoshi per USD and satoshi per EUR
     """
@@ -112,5 +112,5 @@ def moskauzeit(update: Update, _: CallbackContext):
     {sat_per_eur} SAT/EUR
     """)
 
-    update.message.reply_text(text=message, parse_mode='HTML')
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
 
