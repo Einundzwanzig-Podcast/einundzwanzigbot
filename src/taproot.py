@@ -235,7 +235,7 @@ def taproot_handle_command(update: Update, context: CallbackContext):
     try:
         blocks = fetch_latest_blocks()
     except:
-        update.message.reply_text(text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        update.message.reply_text(text='Taproot Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
     
     try:
@@ -250,3 +250,24 @@ def taproot_handle_command(update: Update, context: CallbackContext):
     except Exception as e:
         logging.log(logging.ERROR, e)
         context.bot.send_message(chat_id=update.effective_chat.id, text="Es ist ein Fehler aufgetreten")
+
+def taproot_blocks_handle_command(update: Update, context: CallbackContext):
+    try:
+        if context.args[0] == 'all':
+            number_of_blocks = 2016
+        else:
+            number_of_blocks = int(context.args[0])
+            if number_of_blocks < 1 or number_of_blocks > 2016:
+                number_of_blocks = 144
+    except:
+        number_of_blocks = 144
+
+    try:
+        blocks = fetch_latest_blocks()
+    except:
+        update.message.reply_text(text='Taproot Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+    
+    message = taproot_show_blocks(blocks, number_of_blocks)
+
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML', disable_web_page_preview=True)
