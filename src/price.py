@@ -114,3 +114,22 @@ def moskauzeit(update: Update, context: CallbackContext):
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
 
+def sat_in_fiat(update: Update, context: CallbackContext, fiat: str):
+    """
+    Get the current fiat value of your sat amount
+    """
+
+    try:
+        sats_amount = int(context.args[0])
+    except:
+        sats_amount = 10000
+
+    price = get_coinbase_price(fiat)
+    sats_in_eur = price / 100_000_000 * sats_amount
+    
+    message = dedent(f"""
+    {'{0:,.0f}'.format(sats_amount)} sats = {'{0:,.2f}'.format(sats_in_eur)} {fiat}
+    """)
+
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+

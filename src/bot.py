@@ -10,7 +10,7 @@ import config
 from database import setup_database
 from taproot import taproot_blocks_handle_command, taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
-from price import moskauzeit, preis, price_update_ath
+from price import moskauzeit, preis, price_update_ath, sat_in_fiat
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -29,6 +29,8 @@ def start_command(update: Update, context: CallbackContext):
     /fee - Aktuelle Transaktionsgebühren.
     /mempool - Mempool Visualisierung. Ersters Argument ist die Zahl der Mempool Blöcke, max <i>8</i>.
     /preis - Preis in USD und EUR.
+    /satineur - <i>satoshis</i> Gibt den EUR Preis der satoshis an.
+    /satinusd - <i>satoshis</i> Gibt den USD Preis der satoshis an.
     /blockzeit - Aktuelle Blockzeit.
     /moskauzeit - SAT per USD und SAT per EUR.
     """)
@@ -77,6 +79,18 @@ def moskauzeit_command(update: Update, context: CallbackContext):
     """
     moskauzeit(update, context)
 
+def sat_in_eur_command(update: Update, context: CallbackContext):
+    """
+    Get the current EUR value of your sat amount
+    """
+    sat_in_fiat(update, context, fiat='EUR')
+
+def sat_in_usd_command(update: Update, context: CallbackContext):
+    """
+    Get the current USD value of your sat amount
+    """
+    sat_in_fiat(update, context, fiat='USD')
+
 def run(bot_token: str):
     """
     Starts the bot
@@ -95,6 +109,8 @@ def run(bot_token: str):
     fee_handler = CommandHandler('fee', fee_command, run_async=True)
     mempool_handler = CommandHandler('mempool', mempool_command, run_async=True)
     preis_handler = CommandHandler('preis', preis_command, run_async=True)
+    sat_in_eur_handler = CommandHandler('satineur', sat_in_eur_command, run_async=True)
+    sat_in_usd_handler = CommandHandler('satinusd', sat_in_usd_command, run_async=True)
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
 
@@ -104,6 +120,8 @@ def run(bot_token: str):
     dispatcher.add_handler(fee_handler)
     dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(preis_handler)
+    dispatcher.add_handler(sat_in_eur_handler)
+    dispatcher.add_handler(sat_in_usd_handler)
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
 
