@@ -1,9 +1,11 @@
 import requests
 import logging
-from typing import List, Any, Optional, Dict
+from typing import List, Any, Dict
 from telegram.ext.callbackcontext import CallbackContext
 from textwrap import dedent
 from telegram.update import Update
+import datetime
+
 import config
 
 class TaprootStats:
@@ -202,9 +204,9 @@ def taproot_calculate_signalling_statistics(taprootStats: TaprootStats, show_non
 
     return message
 
-def taproot_handle_command(update: Update, context: CallbackContext):
+def taproot_activation_logic(update: Update, context: CallbackContext):
     """
-    Command Handler for taproot command
+    Taproot softfork activation logic
     """
 
     # If the argument 'all' is sent with the command, we also show all mining pools that
@@ -251,7 +253,48 @@ def taproot_handle_command(update: Update, context: CallbackContext):
         logging.log(logging.ERROR, e)
         context.bot.send_message(chat_id=update.effective_chat.id, text="Es ist ein Fehler aufgetreten")
 
+def taproot_handle_command(update: Update, context: CallbackContext):
+    """
+    Returns the time until taproot is activated on mainnet
+    """
+
+    taproot_activation_block = 709632
+
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height', timeout=5)
+        current_block_height = r.json()
+    except:
+        context.bot.send_message(chat_id=update.message.chat_id, text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+    
+    blocks_till_activation = taproot_activation_block - current_block_height
+
+    # Assuming 10 minute block time
+    minutes_till_activation = blocks_till_activation * 10
+
+    time_till_activation = datetime.timedelta(minutes = minutes_till_activation)
+    now = datetime.datetime.now()
+    time_of_activation = now + time_till_activation
+
+    message = dedent(f"""
+    <b>Taproot</b>
+    Lock-in: Erfolgreich 🎉
+
+    Aktivierung bei Block: <i>{taproot_activation_block}</i>
+    Aktueller Block: <i>{current_block_height}</i>
+    Blöcke bis zur Aktivierung: <i>{blocks_till_activation}</i>
+
+    Geschätztes Datum der Aktivierung: <i>{time_of_activation.strftime('%d.%m.%Y %H:%M UTC')}</i>
+    Geschätzte Zeit bis zur Aktivierung: <i>{time_till_activation.days} Tage {time_till_activation.seconds / 60 / 60:.0f} Stunden</i>
+    """)
+
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+
 def taproot_blocks_handle_command(update: Update, context: CallbackContext):
+    """
+    Shows signalling blocks for taproot
+    """
+
     try:
         if context.args[0] == 'all':
             number_of_blocks = 2016
