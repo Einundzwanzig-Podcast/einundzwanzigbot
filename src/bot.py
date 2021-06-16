@@ -2,13 +2,12 @@ import logging
 from textwrap import dedent
 from telegram.ext import Updater, CommandHandler
 from telegram.ext.callbackcontext import CallbackContext
-from telegram.ext.dispatcher import run_async
 from telegram.update import Update
 
 import config
 
 from database import setup_database
-from taproot import taproot_blocks_handle_command, taproot_handle_command
+from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import moskauzeit, preis, price_update_ath, sat_in_fiat
 

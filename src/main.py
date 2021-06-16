@@ -12,12 +12,6 @@ def main():
         exit(1)
 
     try:
-        config.TAPROOT_WATCH_URL = os.environ['TAPROOT_WATCH_URL']
-    except KeyError:
-        # Use default defined in config
-        pass
-
-    try:
         config.MEMPOOL_SPACE_URL = os.environ['MEMPOOL_SPACE_URL']
     except KeyError:
         # Use default defined in config

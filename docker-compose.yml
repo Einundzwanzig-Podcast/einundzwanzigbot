@@ -9,7 +9,6 @@ services:
             - "./db:/app/db"
         environment: 
             - BOT_TOKEN=xxx # Bot token obtained from Bot Father
-            - TAPROOT_WATCH_URL=https://taproot.watch # URL of the Taproot Watch instance (optional, default: https://taproot.watch)
             - MEMPOOL_SPACE_URL=https://mempool.space # URL of the Mempool Space instance (optional, default: https://mempool.space)
             - USE_WEBHOOK=False # If webhooks should be used (optional, default: False)
             - WEBHOOK_URL=example.com # FQDN for the webhook (optional, only needed if USE_WEBHOOK is True)
