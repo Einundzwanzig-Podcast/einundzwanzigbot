@@ -24,8 +24,7 @@ def start_command(update: Update, context: CallbackContext):
     Du findest den Podcast bei allen gängigen Podcast Apps, oder unter https://einundzwanzig.space.
 
     Kommandos:
-    /taproot - Taproot Aktivierungs-Statistiken. Wenn als erster Argument <i>all</i> übergeben wird, werden auch nicht-signalisierende Pools angezeigt.
-    /taprootblocks - Aktuell signalisierende Taproot Blöcke.
+    /taproot - Zeit bis zur Aktivierung von Taproot.
     /fee - Aktuelle Transaktionsgebühren.
     /mempool - Mempool Visualisierung. Ersters Argument ist die Zahl der Mempool Blöcke, max <i>8</i>.
     /preis - Preis in USD und EUR.
@@ -42,12 +41,6 @@ def taproot_command(update: Update, context: CallbackContext):
     Calculates Taproot Activation Statistics
     """
     taproot_handle_command(update, context)
-
-def taproot_blocks_command(update: Update, context: CallbackContext):
-    """
-    Shows Taproot signalling blocks
-    """
-    taproot_blocks_handle_command(update, context)
 
 def fee_command(update: Update, context: CallbackContext):
     """
@@ -105,7 +98,6 @@ def run(bot_token: str):
 
     start_handler = CommandHandler('start', start_command, run_async=True)
     taproot_handler = CommandHandler('taproot', taproot_command, run_async=True)
-    taproot_blocks_handler = CommandHandler('taprootblocks', taproot_blocks_command, run_async=True)
     fee_handler = CommandHandler('fee', fee_command, run_async=True)
     mempool_handler = CommandHandler('mempool', mempool_command, run_async=True)
     preis_handler = CommandHandler('preis', preis_command, run_async=True)
@@ -116,7 +108,6 @@ def run(bot_token: str):
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
-    dispatcher.add_handler(taproot_blocks_handler)
     dispatcher.add_handler(fee_handler)
     dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(preis_handler)
