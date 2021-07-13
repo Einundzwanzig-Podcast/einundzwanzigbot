@@ -10,6 +10,7 @@ from database import setup_database
 from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import moskauzeit, preis, price_update_ath, sat_in_fiat
+from episode import episode
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -83,6 +84,12 @@ def sat_in_usd_command(update: Update, context: CallbackContext):
     """
     sat_in_fiat(update, context, fiat='USD')
 
+def episode_command(update: Update, context: CallbackContext):
+    """
+    Get the most recent podcast episode
+    """
+    episode(update, context)
+
 def run(bot_token: str):
     """
     Starts the bot
@@ -104,6 +111,7 @@ def run(bot_token: str):
     sat_in_usd_handler = CommandHandler('satinusd', sat_in_usd_command, run_async=True)
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
+    episode_handler = CommandHandler('episode', episode_command, run_asynch=True)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
@@ -114,6 +122,7 @@ def run(bot_token: str):
     dispatcher.add_handler(sat_in_usd_handler)
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
+    dispatcher.add_handler(episode_handler)
 
     job_queue = dispatcher.job_queue
 

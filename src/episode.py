@@ -34,6 +34,3 @@ def episode(update, context):
     else:
         message = 'Das ist kein gültiges Podcast-Format! Bitte gibt eins der folgenden Formate an: Alle, Interviews, Lesestunde, News, Weg'
     context.bot.send_message(chat_id=update.effective_chat.id, text=message)
-
-episode_handler = CommandHandler('Episode', episode)
-dispatcher.add_handler(episode_handler)
