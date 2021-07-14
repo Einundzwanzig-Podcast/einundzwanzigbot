@@ -17,7 +17,7 @@ def getEpisode(url: str) -> str:
     the request fails
     """
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(config.EINUNDZWANZIG_URL + url, timeout=5)
         doc = BeautifulSoup(r.text, "html.parser")
         return f"{config.EINUNDZWANZIG_URL + doc.select('.plain')[0].get('href')}"
     except:
@@ -33,15 +33,15 @@ def episode(update: Update, context: CallbackContext):
         format = "alle"
     
     if format == "news":
-        message = getEpisode(config.EINUNDZWANZIG_URL + urlNews)
+        message = getEpisode(urlNews)
     elif format == "lesestunde":
-        message = getEpisode(config.EINUNDZWANZIG_URL + urlLese)
+        message = getEpisode(urlLese)
     elif format == "alle":
-        message = getEpisode(config.EINUNDZWANZIG_URL + urlAll)
+        message = getEpisode(urlAll)
     elif format == "weg":
-        message = getEpisode(config.EINUNDZWANZIG_URL + urlWeg)
+        message = getEpisode(urlWeg)
     elif format == "interview":
-        message = getEpisode(config.EINUNDZWANZIG_URL + urlInterviews)
+        message = getEpisode(urlInterviews)
     else:
         message = 'Das ist kein gültiges Podcast-Format! Bitte gibt eins der folgenden Formate an: Alle, Interviews, Lesestunde, News, Weg'
 
