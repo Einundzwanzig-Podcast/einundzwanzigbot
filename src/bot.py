@@ -111,7 +111,7 @@ def run(bot_token: str):
     sat_in_usd_handler = CommandHandler('satinusd', sat_in_usd_command, run_async=True)
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
-    episode_handler = CommandHandler('episode', episode_command, run_asynch=True)
+    episode_handler = CommandHandler('episode', episode_command, run_async=True)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
