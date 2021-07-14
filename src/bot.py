@@ -32,6 +32,7 @@ def start_command(update: Update, context: CallbackContext):
     /satinusd - <i>satoshis</i> Gibt den USD Preis der satoshis an.
     /blockzeit - Aktuelle Blockzeit.
     /moskauzeit - SAT per USD und SAT per EUR.
+    /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
     """)
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
