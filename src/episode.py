@@ -1,7 +1,7 @@
-from telegram.ext import Updater
+from telegram import Update
 import requests
 from bs4 import BeautifulSoup
-from telegram.ext import CommandHandler
+from telegram.ext.callbackcontext import CallbackContext
 import config
 
 # Define podcast formats
@@ -11,29 +11,38 @@ urlLese = '/podcast/lesestunde/'
 urlWeg = '/podcast/der-weg/'
 urlInterviews = '/podcast/interviews/'
 
-def getEpisode(url):
+def getEpisode(url: str) -> str:
+    """
+    Returns the link to the most recent episode or an error message, if
+    the request fails
+    """
     try:
         r = requests.get(url, timeout=5)
         doc = BeautifulSoup(r.text, "html.parser")
-        return({config.EINUNDZWANZIG_URL} +(doc.select(".plain")[0].get("href")))
+        return f"{config.EINUNDZWANZIG_URL + doc.select('.plain')[0].get('href')}"
     except:
-        return('Es kann aktuell keine Verbindung zum Server aufgebaut werden. Schau doch solange auf Spotify vorbei: https://open.spotify.com/show/10408JFbE1n8MexfrBv33r')
+        return "Es kann aktuell keine Verbindung zum Server aufgebaut werden. Schau doch solange auf Spotify vorbei: https://open.spotify.com/show/10408JFbE1n8MexfrBv33r"
 
-def episode(update, context):
+def episode(update: Update, context: CallbackContext):
+    """
+    Sends a link to the most recent podcast episode
+    """  
     try:
         format = str(context.args[0]).lower()
-    except: format = "alle"
+    except: 
+        format = "alle"
     
     if format == "news":
-        message = getEpisode({config.EINUNDZWANZIG_URL} + urlNews)
+        message = getEpisode(config.EINUNDZWANZIG_URL + urlNews)
     elif format == "lesestunde":
-        message = getEpisode({config.EINUNDZWANZIG_URL} + urlLese)
+        message = getEpisode(config.EINUNDZWANZIG_URL + urlLese)
     elif format == "alle":
-        message = getEpisode({config.EINUNDZWANZIG_URL} + urlAll)
+        message = getEpisode(config.EINUNDZWANZIG_URL + urlAll)
     elif format == "weg":
-        message = getEpisode({config.EINUNDZWANZIG_URL} + urlWeg)
+        message = getEpisode(config.EINUNDZWANZIG_URL + urlWeg)
     elif format == "interview":
-        message = getEpisode({config.EINUNDZWANZIG_URL} + urlInterviews)
+        message = getEpisode(config.EINUNDZWANZIG_URL + urlInterviews)
     else:
         message = 'Das ist kein gültiges Podcast-Format! Bitte gibt eins der folgenden Formate an: Alle, Interviews, Lesestunde, News, Weg'
+
     context.bot.send_message(chat_id=update.effective_chat.id, text=message)
