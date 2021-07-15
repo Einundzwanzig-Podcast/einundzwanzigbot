@@ -19,3 +19,12 @@ WEBHOOK_PORT = 8443
 FEATURE_ATH = False
 FEATURE_ATH_MANUAL_LAST_ATH = 0.0
 FEATURE_ATH_CHAT_ID = EINUNDZWANZIG_CHAT_ID
+
+#TALLYCOIN DATA
+TALLYDATA = {
+    'type': 'fundraiser',
+    'id': 'zfxqtu',
+    'satoshi_amount': '21',
+    'payment_method': 'ln',
+    'message' : ''
+}
