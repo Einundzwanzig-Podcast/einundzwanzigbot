@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 from telegram.ext.callbackcontext import CallbackContext
 import json
 import config
+import qrcode
+
 
 # Define podcast formats
 urlAll = '/podcast/'
@@ -55,9 +57,13 @@ def getInvoice(amt, shoutout):
     dict = json.loads(response)
     return dict.get("lightning_pay_request")
 
+def createQR(text):
+    img = qrcode.make(text)
+    img.save('qr.png')
+
 def shoutout(update: Update, context: CallbackContext):
     """
-    Returns a TallyCoin LN invoice for a specific amount thats includes a memo
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
     
     chat = update.effective_chat
@@ -69,8 +75,10 @@ def shoutout(update: Update, context: CallbackContext):
             except:
                 shoutout = f'Community-Bot Shoutout'
             invoice = getInvoice(value, shoutout)
+            createQR(invoice)
             context.bot.send_message(chat_id=update.effective_chat.id, text= f'Hier ist deine Shoutout-Invoice über {value} sats:')
-            context.bot.send_message(chat_id=update.effective_chat.id, text= str(invoice))
+            context.bot.send_photo(chat_id=update.effective_chat.id, photo=open('qr.png', 'rb'), caption=str(invoice))
+
         except:
             context.bot.send_message(chat_id=update.effective_chat.id, text= f'Bitte gib einen gültigen Betrag ein')
     else:
