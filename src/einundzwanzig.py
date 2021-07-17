@@ -59,14 +59,20 @@ def shoutout(update: Update, context: CallbackContext):
     """
     Returns a TallyCoin LN invoice for a specific amount thats includes a memo
     """
-    try:
-        value = int(context.args[0])
+    
+    chat = update.effective_chat
+    if chat.type == Chat.PRIVATE:
         try:
-            shoutout = ' '.join(context.args[1:])
+            value = int(context.args[0])
+            try:
+                shoutout = ' '.join(context.args[1:])
+            except:
+                shoutout = f'Community-Bot Shoutout'
+            invoice = getInvoice(value, shoutout)
+            context.bot.send_message(chat_id=update.effective_chat.id, text= f'Hier ist deine Shoutout-Invoice über {value} sats:')
+            context.bot.send_message(chat_id=update.effective_chat.id, text= str(invoice))
         except:
-            shoutout = f'Community-Bot Shoutout'
-        invoice = getInvoice(value, shoutout)
-        context.bot.send_message(chat_id=update.effective_chat.id, text= f'Hier ist deine Shoutout-Invoice über {value} sats:')
-        context.bot.send_message(chat_id=update.effective_chat.id, text= str(invoice))
-    except:
-        context.bot.send_message(chat_id=update.effective_chat.id, text= f'Bitte gib einen gültigen Betrag ein')
+            context.bot.send_message(chat_id=update.effective_chat.id, text= f'Bitte gib einen gültigen Betrag ein')
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text= f'''
+        Shoutouts können nur im direkten Chat mit dem Community Bot gesendet werden. Bitte beginne eine Konvesation mit @einundzwanzigbot!''')
