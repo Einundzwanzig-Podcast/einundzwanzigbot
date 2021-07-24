@@ -3,3 +3,4 @@ requests
 beautifulsoup4
 json
 qrcode
+os

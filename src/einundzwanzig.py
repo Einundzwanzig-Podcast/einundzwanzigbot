@@ -5,6 +5,7 @@ from telegram.ext.callbackcontext import CallbackContext
 import json
 import config
 import qrcode
+import os
 
 
 # Define podcast formats
@@ -51,15 +52,23 @@ def episode(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text=message)
 
 def getInvoice(amt, shoutout):
-    config.TALLYDATA['satoshi_amount'] = str(amt)
-    config.TALLYDATA['message'] = shoutout[0:139]
-    response = requests.post('https://api.tallyco.in/v1/payment/request/', data=config.TALLYDATA).text
+    TALLYDATA = {
+    'type': 'fundraiser',
+    'id': 'zfxqtu',
+    'satoshi_amount': '21',
+    'payment_method': 'ln',
+    'message' : ''
+    }
+    
+    TALLYDATA['satoshi_amount'] = str(amt)
+    TALLYDATA['message'] = shoutout[0:139]
+    response = requests.post('https://api.tallyco.in/v1/payment/request/', data=TALLYDATA).text
     dict = json.loads(response)
     return dict.get("lightning_pay_request")
 
-def createQR(text):
+def createQR(text, chatid):
     img = qrcode.make(text)
-    img.save('qr.png')
+    img.save(str(chatid) + '.png')
 
 def shoutout(update: Update, context: CallbackContext):
     """
@@ -75,9 +84,13 @@ def shoutout(update: Update, context: CallbackContext):
             except:
                 shoutout = f'Community-Bot Shoutout'
             invoice = getInvoice(value, shoutout)
-            createQR(invoice)
+            createQR(invoice, update.effective_chat.id)
             context.bot.send_message(chat_id=update.effective_chat.id, text= f'Hier ist deine Shoutout-Invoice über {value} sats:')
-            context.bot.send_photo(chat_id=update.effective_chat.id, photo=open('qr.png', 'rb'), caption=str(invoice))
+            context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(update.effective_chat.id + '.png', 'rb'), caption=str(invoice))
+            try:
+                os.remove(str(update.effective_chat.id) + '.png')
+            except:
+                print('ERROR: QR-Datei konnte nicht gelöscht werden')
 
         except:
             context.bot.send_message(chat_id=update.effective_chat.id, text= f'Bitte gib einen gültigen Betrag ein')

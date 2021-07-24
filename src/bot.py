@@ -94,7 +94,7 @@ def episode_command(update: Update, context: CallbackContext):
 
 def shoutout_command(update: Update, context: CallbackContext):
     """
-    Returns a TallyCoin LN invoice for a specific amount thats includes a memo
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
     shoutout(update, context)
 
