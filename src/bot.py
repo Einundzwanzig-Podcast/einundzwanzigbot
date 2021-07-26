@@ -1,6 +1,6 @@
 import logging
 from textwrap import dedent
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
 
@@ -10,7 +10,7 @@ from database import setup_database
 from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import moskauzeit, preis, price_update_ath, sat_in_fiat
-from einundzwanzig import episode, shoutout
+from einundzwanzig import episode, shoutout, memo, invoice, cancel
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -98,6 +98,26 @@ def shoutout_command(update: Update, context: CallbackContext):
     """
     shoutout(update, context)
 
+def memo_command(update: Update, context: CallbackContext):
+    """
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
+    """
+    memo(update, context)
+
+def invoice_command(update: Update, context: CallbackContext):
+    """
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
+    """
+    invoice(update, context)
+
+def cancel_command(update: Update, context: CallbackContext):
+    """
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
+    """
+    cancel(update, context)
+
+
+
 def run(bot_token: str):
     """
     Starts the bot
@@ -120,7 +140,14 @@ def run(bot_token: str):
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
     episode_handler = CommandHandler('episode', episode_command, run_async=True)
-    shoutout_handler = CommandHandler('shoutout', shoutout_command, run_async=True)
+    shoutout_handler = ConversationHandler(
+        entry_points=[CommandHandler('shoutout', shoutout_command, run_async=True)],
+        states={
+            SHOUTOUT_AMOUNT: [MessageHandler(Filters.regex('^[0-9]*$'), memo_command, run_async=True)],
+            SHOUTOUT_MEMO: [MessageHandler(Filters.text, invoice_command, run_async=True)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel_command, run_async=True)],
+    )
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)

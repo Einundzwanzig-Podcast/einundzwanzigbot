@@ -1,7 +1,8 @@
 from telegram import Update
 import requests
 from bs4 import BeautifulSoup
-from telegram.ext.callbackcontext import CallbackContext
+from telegram.ext import ConversationHandler, CallbackContext
+
 import json
 import config
 import qrcode
@@ -70,30 +71,52 @@ def createQR(text, chatid):
     img = qrcode.make(text)
     img.save(str(chatid) + '.png')
 
-def shoutout(update: Update, context: CallbackContext):
-    """
-    Returns a TallyCoin LN invoice for a specific amount that includes a memo
-    """
-    
+SHOUTOUT_AMOUNT, SHOUTOUT_MEMO = range(2)
+
+
+def shoutout(update: Update, context: CallbackContext) -> int:
+    """Starts the shoutout-conversation and asks the user about the donation amount."""
     chat = update.effective_chat
     if chat.type == Chat.PRIVATE:
-        try:
-            value = int(context.args[0])
-            try:
-                shoutout = ' '.join(context.args[1:])
-            except:
-                shoutout = f'Community-Bot Shoutout'
-            invoice = getInvoice(value, shoutout)
-            createQR(invoice, update.effective_chat.id)
-            context.bot.send_message(chat_id=update.effective_chat.id, text= f'Hier ist deine Shoutout-Invoice über {value} sats:')
-            context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(update.effective_chat.id + '.png', 'rb'), caption=str(invoice))
-            try:
-                os.remove(str(update.effective_chat.id) + '.png')
-            except:
-                print('ERROR: QR-Datei konnte nicht gelöscht werden')
-
-        except:
-            context.bot.send_message(chat_id=update.effective_chat.id, text= f'Bitte gib einen gültigen Betrag ein')
+        update.message.reply_text(
+        'Hi! Du möchtest also einen Shout-Out bei Einundzwanzig kaufen? (Du kannst den Vorgang jederzeit mit /cancel abbrechen)\n\n'
+        'Falls ja, bitte nenne jetzt die Menge an Satoshis die du spenden möchtest als Zahl (Bspw: "21000").',)
+        return SHOUTOUT_AMOUNT
     else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text= f'''
-        Shoutouts können nur im direkten Chat mit dem Community Bot gesendet werden. Bitte beginne eine Konvesation mit @einundzwanzigbot!''')
+        update.message.reply_text('Shoutouts können nur im privaten Chat mit dem Bot erstellt werden')
+        return ConversationHandler.END
+
+
+def memo(update: Update, context: CallbackContext) -> int:
+    """Stores the amount and asks for the doantion-message"""
+    
+    text = update.message.text
+    context.user_data['amount'] = int(text)
+    update.message.reply_text(
+        f'''Alles klar! Du möchtest also {context.user_data["amount"]} Satoshis spenden.\n\n
+Bitte füge deiner Spende noch eine Nachricht (max. 140 Zeichen) hinzu. Spenden über 21.000 Satoshi werden in der nächsten Newsepisode vorgelesen!''')
+    return SHOUTOUT_MEMO
+
+
+def invoice(update: Update, context: CallbackContext) -> int:
+    """Stores the message and returns the lightning invoice + qr code."""
+    message = update.message.text
+    context.user_data['message'] = message
+    amount = context.user_data['amount']
+
+    invoice = getInvoice(amount, message)
+    createQR(invoice, update.effective_chat.id)
+    context.bot.send_message(chat_id=update.effective_chat.id, text= f'Hier ist deine Shoutout-Invoice über {amount} sats:')
+    context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(str(update.effective_chat.id) + '.png', 'rb'), caption=str(invoice))
+    try:
+        os.remove(str(update.effective_chat.id) + '.png')
+    except:
+        print('ERROR: QR-Datei konnte nicht gelöscht werden')
+    return ConversationHandler.END
+
+
+def cancel(update: Update, context: CallbackContext) -> int:
+    """Cancels and ends the conversation."""
+    update.message.reply_text('Shoutout Abgrebrochen! Bis zum nächsten mal!')
+    
+    return ConversationHandler.END
