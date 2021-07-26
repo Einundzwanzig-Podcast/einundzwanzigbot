@@ -83,7 +83,7 @@ def shoutout(update: Update, context: CallbackContext) -> int:
         'Falls ja, bitte nenne jetzt die Menge an Satoshis die du spenden möchtest als Zahl (Bspw: "21000").',)
         return SHOUTOUT_AMOUNT
     else:
-        update.message.reply_text('Shoutouts können nur im privaten Chat mit dem Bot erstellt werden')
+        update.message.reply_text('Shoutouts können nur im privaten Chat mit dem Bot erstellt werden. Bitte beginne einen direkten Chat mit @einundzwanzigbot !')
         return ConversationHandler.END
 
 
