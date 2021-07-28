@@ -10,7 +10,7 @@ from database import setup_database
 from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import moskauzeit, preis, price_update_ath, sat_in_fiat
-from einundzwanzig import episode, shoutout, memo, invoice, cancel
+from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -36,7 +36,7 @@ def start_command(update: Update, context: CallbackContext):
     /shoutout <i>betrag</i> <i>memo</i> - LN Invoice für einen Shoutout (Ab 21k vorgelesen im Podcast)
     """)
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
+    update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
 
 def taproot_command(update: Update, context: CallbackContext):
     """
@@ -92,11 +92,11 @@ def episode_command(update: Update, context: CallbackContext):
     """
     episode(update, context)
 
-def shoutout_command(update: Update, context: CallbackContext):
+def shoutout_command(update: Update, context: CallbackContext) -> int:
     """
     Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
-    shoutout(update, context)
+    return shoutout(update, context)
 
 def memo_command(update: Update, context: CallbackContext):
     """
