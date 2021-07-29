@@ -33,7 +33,7 @@ def start_command(update: Update, context: CallbackContext):
     /blockzeit - Aktuelle Blockzeit.
     /moskauzeit - SAT per USD und SAT per EUR.
     /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
-    /shoutout <i>betrag</i> <i>memo</i> - LN Invoice für einen Shoutout (Ab 21k vorgelesen im Podcast)
+    /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
@@ -98,24 +98,23 @@ def shoutout_command(update: Update, context: CallbackContext) -> int:
     """
     return shoutout(update, context)
 
-def memo_command(update: Update, context: CallbackContext):
+def memo_command(update: Update, context: CallbackContext) -> int:
     """
     Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
-    memo(update, context)
+    return memo(update, context)
 
-def invoice_command(update: Update, context: CallbackContext):
+def invoice_command(update: Update, context: CallbackContext) -> int:
     """
     Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
-    invoice(update, context)
+    return invoice(update, context)
 
-def cancel_command(update: Update, context: CallbackContext):
+def cancel_command(update: Update, context: CallbackContext) -> int:
     """
     Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
-    cancel(update, context)
-
+    return cancel(update, context)
 
 
 def run(bot_token: str):
@@ -141,12 +140,13 @@ def run(bot_token: str):
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
     episode_handler = CommandHandler('episode', episode_command, run_async=True)
     shoutout_handler = ConversationHandler(
-        entry_points=[CommandHandler('shoutout', shoutout_command, run_async=True)],
+        entry_points=[CommandHandler('shoutout', shoutout_command)],
         states={
-            SHOUTOUT_AMOUNT: [MessageHandler(Filters.regex('^[0-9]*$'), memo_command, run_async=True)],
-            SHOUTOUT_MEMO: [MessageHandler(Filters.text, invoice_command, run_async=True)]
+            SHOUTOUT_AMOUNT: [MessageHandler(Filters.text & ~Filters.command, memo_command)],
+            SHOUTOUT_MEMO: [MessageHandler(Filters.text & ~Filters.command, invoice_command)]
         },
-        fallbacks=[CommandHandler('cancel', cancel_command, run_async=True)],
+        fallbacks=[CommandHandler('cancel', cancel_command)],
+        run_async=True
     )
 
     dispatcher.add_handler(start_handler)
