@@ -6,6 +6,7 @@ from telegram.ext import ConversationHandler, CallbackContext
 from textwrap import dedent
 
 import json
+import time
 
 from telegram.utils.helpers import effective_message_type
 import config
@@ -82,7 +83,7 @@ def getInvoice(amt: int, memo: str) -> str:
     TALLYDATA['message'] = memo
     response = requests.post('https://api.tallyco.in/v1/payment/request/', data=TALLYDATA).text
     dict = json.loads(response)
-    return dict["lightning_pay_request"]
+    return dict["lightning_pay_request"], dict["tc_payment_id"]
 
 def createQR(text: str, chatid: int):
     """
@@ -91,6 +92,30 @@ def createQR(text: str, chatid: int):
 
     img = qrcode.make(text)
     img.save(f"{chatid}.png")
+
+def checkPayment(paymentID):
+    timeout = time.time() + 60*10
+    paid = 0
+
+    VERIFYDATA = {
+        'payment_id': paymentID
+    }
+
+    while True:
+        if paid == 1:
+            return('Vielen Dank, wir haben deine Zahlung erhalten!')
+        elif time.time() > timeout:
+            return('Es konnte kein Zahlungseingang festgestellt werden')
+        else:
+            try:
+                r = requests.post('https://api.tallyco.in/v1/payment/verify/', data=VERIFYDATA).text
+                dict = json.loads(r)
+                if dict["payment_state"] == 'paid':
+                    paid = 1
+            except:
+                logging.error(f'ERROR: Failed to verify payment status')
+                return('Es gab ein Problem beim Verifizieren der Zahlung. Wenn du die Invoice bezahlt hast, sollte dein Shoutout zeitnah auf https://tallyco.in/s/zfxqtu/ zu sehen sein.')
+        time.sleep(20)
 
 
 def shoutout(update: Update, context: CallbackContext) -> int:
@@ -169,14 +194,14 @@ def invoice(update: Update, context: CallbackContext) -> int:
     else:
         
         try:
-            invoice = getInvoice(sat_amount, memo)     
+            invoice = getInvoice(sat_amount, memo) 
         except Exception as e:
             context.bot.send_message(chat_id=update.effective_chat.id, text= f'Fehler beim Erstellen der Invoice! Bitte versuche es später nochmal!')
             logging.error(f'Error while trying to generate invoice: {e}')
             return ConversationHandler.END
         
         try:
-            createQR(invoice, update.effective_chat.id)
+            createQR(invoice[0], update.effective_chat.id)
         except Exception as e:
             context.bot.send_message(chat_id=update.effective_chat.id, text= f'Fehler beim Erstellen des QR-Codes! Bitte versuche es später nochmal!')
             logging.error(f'Error while trying to generate QR code: {e}')
@@ -192,13 +217,14 @@ def invoice(update: Update, context: CallbackContext) -> int:
         ''')
 
         context.bot.send_message(chat_id=update.effective_chat.id, text=shoutoutMessage, parse_mode='HTML')
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'{update.effective_chat.id}.png', 'rb'), caption=str(invoice).lower())
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'{update.effective_chat.id}.png', 'rb'), caption=str(invoice[0]).lower())
         
         try:
             os.remove(f'{update.effective_chat.id}.png')
         except:
             logging.error(f'ERROR: QR-code file {update.effective_chat.id}.png could not be deleted')
-
+        
+        context.bot.send_message(chat_id=update.effective_chat.id, text=checkPayment(invoice[1]), parse_mode='HTML')
         return ConversationHandler.END
 
 
