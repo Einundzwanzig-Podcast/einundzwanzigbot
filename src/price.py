@@ -1,9 +1,10 @@
-from typing import Optional, Tuple
+from typing import Tuple
 import requests
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
 from database import get_connection
 from textwrap import dedent
+import os
 import config
 
 def get_coinbase_price(fiat: str = 'USD') -> float:
@@ -132,4 +133,10 @@ def sat_in_fiat(update: Update, context: CallbackContext, fiat: str):
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+
+def glaskugel(update: Update, context: CallbackContext):
+    """
+    Sends Hosp Meme
+    """
+    update.message.reply_photo(open(os.path.join(os.path.dirname(__file__), 'img', 'hosp_meme.jpeg'), 'rb'))
 
