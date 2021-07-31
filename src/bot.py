@@ -9,8 +9,9 @@ import config
 from database import setup_database
 from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
-from price import moskauzeit, preis, price_update_ath, sat_in_fiat
+from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
 from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO
+
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -34,6 +35,7 @@ def start_command(update: Update, context: CallbackContext):
     /moskauzeit - SAT per USD und SAT per EUR.
     /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
+    /glaskugel - Preis Vorhersage
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
@@ -116,6 +118,11 @@ def cancel_command(update: Update, context: CallbackContext) -> int:
     """
     return cancel(update, context)
 
+def glaskugel_command(update: Update, context: CallbackContext):
+    """
+    Sends the Hosp Glaskugel picture
+    """
+    glaskugel(update, context)
 
 def run(bot_token: str):
     """
@@ -148,6 +155,7 @@ def run(bot_token: str):
         fallbacks=[CommandHandler('cancel', cancel_command)],
         run_async=True
     )
+    glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
@@ -160,6 +168,7 @@ def run(bot_token: str):
     dispatcher.add_handler(moskauzeit_handler)
     dispatcher.add_handler(episode_handler)
     dispatcher.add_handler(shoutout_handler)
+    dispatcher.add_handler(glaskugel_handler)
 
     job_queue = dispatcher.job_queue
 
