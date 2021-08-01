@@ -188,10 +188,10 @@ def invoice(update: Update, context: CallbackContext) -> int:
         Memo: {memo}
 
         Sobald die Invoice bezahlt wurde ist der Vorgang abgeschlossen.
-        Deine Nachricht und deine sats sind dann bei uns angekommen.
+        Du kannst den Status deiner Zahlung hier überprüfen: https://tallyco.in/s/zfxqtu/
         ''')
 
-        context.bot.send_message(chat_id=update.effective_chat.id, text=shoutoutMessage, parse_mode='HTML')
+        context.bot.send_message(chat_id=update.effective_chat.id, text=shoutoutMessage, parse_mode='HTML', disable_web_page_preview=True)
         context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'{update.effective_chat.id}.png', 'rb'), caption=str(invoice).lower())
         
         try:
