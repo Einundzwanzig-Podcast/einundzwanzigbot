@@ -153,7 +153,10 @@ def run(bot_token: str):
             SHOUTOUT_MEMO: [MessageHandler(Filters.text & ~Filters.command, invoice_command)]
         },
         fallbacks=[CommandHandler('cancel', cancel_command)],
-        run_async=True
+        run_async=True,
+        allow_reentry=True,
+        conversation_timeout=60 * 20, # 20 minutes
+        name='shoutout'
     )
     glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)
 
