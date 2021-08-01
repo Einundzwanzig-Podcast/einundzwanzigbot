@@ -1,6 +1,6 @@
 import logging
 from textwrap import dedent
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
 
@@ -10,7 +10,8 @@ from database import setup_database
 from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
-from episode import episode
+from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO
+
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -33,10 +34,11 @@ def start_command(update: Update, context: CallbackContext):
     /blockzeit - Aktuelle Blockzeit.
     /moskauzeit - SAT per USD und SAT per EUR.
     /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
+    /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
     """)
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
+    update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
 
 def taproot_command(update: Update, context: CallbackContext):
     """
@@ -92,6 +94,30 @@ def episode_command(update: Update, context: CallbackContext):
     """
     episode(update, context)
 
+def shoutout_command(update: Update, context: CallbackContext) -> int:
+    """
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
+    """
+    return shoutout(update, context)
+
+def memo_command(update: Update, context: CallbackContext) -> int:
+    """
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
+    """
+    return memo(update, context)
+
+def invoice_command(update: Update, context: CallbackContext) -> int:
+    """
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
+    """
+    return invoice(update, context)
+
+def cancel_command(update: Update, context: CallbackContext) -> int:
+    """
+    Returns a TallyCoin LN invoice for a specific amount that includes a memo
+    """
+    return cancel(update, context)
+
 def glaskugel_command(update: Update, context: CallbackContext):
     """
     Sends the Hosp Glaskugel picture
@@ -120,6 +146,18 @@ def run(bot_token: str):
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
     episode_handler = CommandHandler('episode', episode_command, run_async=True)
+    shoutout_handler = ConversationHandler(
+        entry_points=[CommandHandler('shoutout', shoutout_command)],
+        states={
+            SHOUTOUT_AMOUNT: [MessageHandler(Filters.text & ~Filters.command, memo_command)],
+            SHOUTOUT_MEMO: [MessageHandler(Filters.text & ~Filters.command, invoice_command)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel_command)],
+        run_async=True,
+        allow_reentry=True,
+        conversation_timeout=60 * 20, # 20 minutes
+        name='shoutout'
+    )
     glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)
 
     dispatcher.add_handler(start_handler)
@@ -132,6 +170,7 @@ def run(bot_token: str):
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
     dispatcher.add_handler(episode_handler)
+    dispatcher.add_handler(shoutout_handler)
     dispatcher.add_handler(glaskugel_handler)
 
     job_queue = dispatcher.job_queue
