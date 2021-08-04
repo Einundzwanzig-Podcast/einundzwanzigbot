@@ -11,6 +11,7 @@ from telegram.utils.helpers import effective_message_type
 import config
 import qrcode
 import os
+import time
 
 import logging
 
@@ -189,9 +190,12 @@ def invoice(update: Update, context: CallbackContext) -> int:
 
         Sobald die Invoice bezahlt wurde ist der Vorgang abgeschlossen.
         Du kannst den Status deiner Zahlung hier überprüfen: https://tallyco.in/s/zfxqtu/
+        Bitte beachte, dass es etwas dauern kann, bevor dein Shoutout auf Tallyco.in angezeigt wird.
+        Invoice wird erstellt, bitte warten...
         ''')
 
         context.bot.send_message(chat_id=update.effective_chat.id, text=shoutoutMessage, parse_mode='HTML', disable_web_page_preview=True)
+        time.sleep(5)
         context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'{update.effective_chat.id}.png', 'rb'), caption=str(invoice).lower())
         
         try:
