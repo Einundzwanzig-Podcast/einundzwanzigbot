@@ -40,11 +40,13 @@ def start_command(update: Update, context: CallbackContext):
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
 
+
 def taproot_command(update: Update, context: CallbackContext):
     """
     Calculates Taproot Activation Statistics
     """
     taproot_handle_command(update, context)
+
 
 def fee_command(update: Update, context: CallbackContext):
     """
@@ -52,11 +54,13 @@ def fee_command(update: Update, context: CallbackContext):
     """
     mempool_space_fees(update, context)
 
+
 def mempool_command(update: Update, context: CallbackContext):
     """
     Get current mempool stats
     """
     mempool_space_mempool_stats(update, context)
+
 
 def blockzeit_command(update: Update, context: CallbackContext):
     """
@@ -64,11 +68,13 @@ def blockzeit_command(update: Update, context: CallbackContext):
     """
     blockzeit(update, context)
 
+
 def preis_command(update: Update, context: CallbackContext):
     """
     Get the current price in USD and EUR
     """
     preis(update, context)
+
 
 def moskauzeit_command(update: Update, context: CallbackContext):
     """
@@ -76,11 +82,13 @@ def moskauzeit_command(update: Update, context: CallbackContext):
     """
     moskauzeit(update, context)
 
+
 def sat_in_eur_command(update: Update, context: CallbackContext):
     """
     Get the current EUR value of your sat amount
     """
     sat_in_fiat(update, context, fiat='EUR')
+
 
 def sat_in_usd_command(update: Update, context: CallbackContext):
     """
@@ -88,11 +96,13 @@ def sat_in_usd_command(update: Update, context: CallbackContext):
     """
     sat_in_fiat(update, context, fiat='USD')
 
+
 def episode_command(update: Update, context: CallbackContext):
     """
     Get the most recent podcast episode
     """
     episode(update, context)
+
 
 def shoutout_command(update: Update, context: CallbackContext) -> int:
     """
@@ -100,11 +110,13 @@ def shoutout_command(update: Update, context: CallbackContext) -> int:
     """
     return shoutout(update, context)
 
+
 def memo_command(update: Update, context: CallbackContext) -> int:
     """
     Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
     return memo(update, context)
+
 
 def invoice_command(update: Update, context: CallbackContext) -> int:
     """
@@ -112,17 +124,20 @@ def invoice_command(update: Update, context: CallbackContext) -> int:
     """
     return invoice(update, context)
 
+
 def cancel_command(update: Update, context: CallbackContext) -> int:
     """
     Returns a TallyCoin LN invoice for a specific amount that includes a memo
     """
     return cancel(update, context)
 
+
 def glaskugel_command(update: Update, context: CallbackContext):
     """
     Sends the Hosp Glaskugel picture
     """
     glaskugel(update, context)
+
 
 def run(bot_token: str):
     """
@@ -155,7 +170,7 @@ def run(bot_token: str):
         fallbacks=[CommandHandler('cancel', cancel_command)],
         run_async=True,
         allow_reentry=True,
-        conversation_timeout=60 * 20, # 20 minutes
+        conversation_timeout=60 * 20,  # 20 minutes
         name='shoutout'
     )
     glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)

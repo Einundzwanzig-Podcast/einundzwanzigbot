@@ -4,11 +4,13 @@ from telegram.update import Update
 from textwrap import dedent
 import config
 
+
 class MempoolSpaceFees:
     def __init__(self, one_block_fee: int, three_block_fee: int, six_block_fee: int) -> None:
         self.one_block_fee = one_block_fee
         self.three_block_fee = three_block_fee
         self.six_block_fee = six_block_fee
+
 
 def mempool_space_fees(update: Update, context: CallbackContext):
     """
@@ -18,7 +20,8 @@ def mempool_space_fees(update: Update, context: CallbackContext):
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/fees/recommended', timeout=5)
         json = r.json()
     except:
-        context.bot.send_message(chat_id=update.message.chat_id, text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
 
     fees = MempoolSpaceFees(
@@ -36,6 +39,7 @@ def mempool_space_fees(update: Update, context: CallbackContext):
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
 
+
 def fee_emoji(fee: float) -> str:
     """
     Returns an emoji depending on the fee
@@ -48,6 +52,7 @@ def fee_emoji(fee: float) -> str:
         return '🟨'
     return '🟩'
 
+
 def mempool_space_mempool_stats(update: Update, context: CallbackContext):
     """
     Mempool statistics from mempool space
@@ -57,14 +62,16 @@ def mempool_space_mempool_stats(update: Update, context: CallbackContext):
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/mempool', timeout=5)
         mempool = r.json()
     except:
-        context.bot.send_message(chat_id=update.message.chat_id, text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
 
     try:
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/fees/mempool-blocks', timeout=5)
         blocks = r.json()
     except:
-        context.bot.send_message(chat_id=update.message.chat_id, text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
 
     try:
@@ -93,12 +100,13 @@ def mempool_space_mempool_stats(update: Update, context: CallbackContext):
 
         if index <= num_blocks - 1:
             message += dedent(f"""
-            <i>Block {index+1} (In ~{(index+1) * 10} min)</i>
+            <i>Block {index + 1} (In ~{(index + 1) * 10} min)</i>
             {fee_emoji(max_fee)} Max: {max_fee:.1f} sat/vbyte 
             {fee_emoji(min_fee)} Min: {min_fee:.1f} sat/vbyte
             """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+
 
 def blockzeit(update: Update, context: CallbackContext):
     """
@@ -108,7 +116,8 @@ def blockzeit(update: Update, context: CallbackContext):
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height', timeout=5)
         height = r.json()
     except:
-        context.bot.send_message(chat_id=update.message.chat_id, text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
 
     message = dedent(f"""

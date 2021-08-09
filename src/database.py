@@ -5,6 +5,7 @@ import config
 
 SQLITE_DB_PATH = "db/einundzwanzig.db"
 
+
 def setup_database():
     """
     Sets up the database and initialises all tables
@@ -26,11 +27,13 @@ def setup_database():
 
     first_entry = cur.execute('SELECT * FROM price').fetchone()
 
-    if first_entry == None and config.FEATURE_ATH_MANUAL_LAST_ATH != 0:
-        cur.execute('INSERT INTO price (price_usd, last_message_id) VALUES (?, 0)', (config.FEATURE_ATH_MANUAL_LAST_ATH,))
+    if first_entry is None and config.FEATURE_ATH_MANUAL_LAST_ATH != 0:
+        cur.execute('INSERT INTO price (price_usd, last_message_id) VALUES (?, 0)',
+                    (config.FEATURE_ATH_MANUAL_LAST_ATH,))
 
     con.commit()
     con.close()
+
 
 def get_connection() -> Connection:
     """

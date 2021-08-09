@@ -2,6 +2,7 @@ import os
 from bot import run
 import config
 
+
 # Main entrypoint
 def main():
 

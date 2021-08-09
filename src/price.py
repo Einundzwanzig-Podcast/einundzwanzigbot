@@ -7,6 +7,7 @@ from textwrap import dedent
 import os
 import config
 
+
 def get_coinbase_price(fiat: str = 'USD') -> float:
     """
     Get the current BTC-USD spot exchange rate
@@ -14,6 +15,7 @@ def get_coinbase_price(fiat: str = 'USD') -> float:
     r = requests.get(f'https://api.coinbase.com/v2/prices/spot?currency={fiat}', timeout=5)
     json = r.json()
     return float(json['data']['amount'])
+
 
 def get_last_ath_price_and_message_id() -> Tuple[float, int]:
     """
@@ -30,7 +32,8 @@ def get_last_ath_price_and_message_id() -> Tuple[float, int]:
     if previous_price == None:
         previous_price = (0.0, 0)
 
-    return previous_price  
+    return previous_price
+
 
 def save_price_to_db(price: float, last_message_id: int) -> None:
     """
@@ -39,12 +42,13 @@ def save_price_to_db(price: float, last_message_id: int) -> None:
 
     connection = get_connection()
     cur = connection.cursor()
- 
+
     cur.execute('DELETE FROM price WHERE 1')
     cur.execute('INSERT INTO price (price_usd, last_message_id) VALUES (?, ?)', (price, last_message_id))
 
     connection.commit()
     connection.close()
+
 
 def price_update_ath(context: CallbackContext) -> None:
     """
@@ -69,7 +73,7 @@ def price_update_ath(context: CallbackContext) -> None:
         <b>Neues Allzeithoch</b>
         {price_formatted} USD
         """)
-        
+
         # We try to delete the old message
         # This only works if the message is less than 48 hours old
         try:
@@ -80,6 +84,7 @@ def price_update_ath(context: CallbackContext) -> None:
         sent_message = context.bot.send_message(text=message, chat_id=config.FEATURE_ATH_CHAT_ID, parse_mode='HTML')
 
         save_price_to_db(price, sent_message.message_id)
+
 
 def preis(update: Update, context: CallbackContext):
     """
@@ -96,6 +101,7 @@ def preis(update: Update, context: CallbackContext):
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+
 
 def moskauzeit(update: Update, context: CallbackContext):
     """
@@ -115,6 +121,7 @@ def moskauzeit(update: Update, context: CallbackContext):
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
 
+
 def sat_in_fiat(update: Update, context: CallbackContext, fiat: str):
     """
     Get the current fiat value of your sat amount
@@ -127,16 +134,16 @@ def sat_in_fiat(update: Update, context: CallbackContext, fiat: str):
 
     price = get_coinbase_price(fiat)
     sats_in_eur = price / 100_000_000 * sats_amount
-    
+
     message = dedent(f"""
     {'{0:,.0f}'.format(sats_amount)} sats = {'{0:,.2f}'.format(sats_in_eur)} {fiat}
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
 
+
 def glaskugel(update: Update, context: CallbackContext):
     """
     Sends Hosp Meme
     """
     update.message.reply_photo(open(os.path.join(os.path.dirname(__file__), 'img', 'hosp_meme.jpeg'), 'rb'))
-
