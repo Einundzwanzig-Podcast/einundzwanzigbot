@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 import requests
 from bs4 import BeautifulSoup
 from telegram.chat import Chat
@@ -98,7 +98,7 @@ def shoutout(update: Update, context: CallbackContext) -> int:
     """
 
     chat = update.effective_chat
-    if chat != None and chat.type == Chat.PRIVATE:
+    if chat is not None and chat.type == Chat.PRIVATE:
         update.message.reply_text(dedent('''
         Hi! Du möchtest also einen Shoutout bei Einundzwanzig kaufen? Toll!\n
         Bitte nenne zuerst die Menge an Satoshis die du spenden möchtest (Bspw: 21000). Beachte, dass lediglich Spenden
@@ -108,8 +108,8 @@ def shoutout(update: Update, context: CallbackContext) -> int:
         return SHOUTOUT_AMOUNT
     else:
         update.message.reply_text(
-            'Shoutouts können nur im privaten Chat mit dem Bot gesendet werden. Bitte beginne einen direkten Chat mit '
-            '@einundzwanzigbot.')
+            f'Shoutouts können nur im privaten Chat mit dem Bot gesendet werden. Bitte beginne einen direkten Chat mit '
+            f'{context.bot.name}.')
         return ConversationHandler.END
 
 
@@ -197,9 +197,11 @@ def invoice(update: Update, context: CallbackContext) -> int:
         Invoice wird erstellt, bitte warten...
         ''')
 
-        context.bot.send_message(chat_id=update.effective_chat.id, text=shoutout_message, parse_mode='HTML', disable_web_page_preview=True)
+        context.bot.send_message(chat_id=update.effective_chat.id, text=shoutout_message, parse_mode='HTML',
+                                 disable_web_page_preview=True)
         time.sleep(5)
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'{update.effective_chat.id}.png', 'rb'), caption=str(invoice).lower())
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'{update.effective_chat.id}.png', 'rb'),
+                               caption=str(invoice).lower())
 
         try:
             os.remove(f'{update.effective_chat.id}.png')
@@ -214,3 +216,91 @@ def cancel(update: Update, context: CallbackContext) -> int:
     update.message.reply_text('Shoutout abgebrochen.')
 
     return ConversationHandler.END
+
+
+def soundboard(update: Update, context: CallbackContext):
+    """Get the soundboard markup from the Einundzwanzig website"""
+    chat = update.effective_chat
+
+    if chat is not None and chat.type != Chat.PRIVATE:
+        update.message.reply_text(
+            f'Das Soundboard kann nur im privaten Chat mit dem Bot gesendet werden. Bitte beginne einen direkten Chat '
+            f'mit {context.bot.name}.')
+        return
+
+    try:
+        sounds_request = requests.get(f'{config.EINUNDZWANZIG_URL}/sounds.json', timeout=5)
+    except:
+        update.message.reply_text('Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+
+    sounds_dict = json.loads(sounds_request.text)
+
+    keyboard = []
+
+    for group in sounds_dict:
+        # Set the callback data to "group_" and then the group name
+        keyboard.append([InlineKeyboardButton(group['title'], callback_data=f"group_{group['title']}")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # We need a reference to the sound dict for use in the callback query
+    context.user_data['sounds_dict'] = sounds_dict
+
+    update.message.reply_text('Bitte wähle eine Kategorie', reply_markup=reply_markup)
+
+
+def soundboard_button(update: Update, context: CallbackContext):
+    """Handles the callback query"""
+
+    query = update.callback_query
+    query.answer()
+
+    sounds_dict = context.user_data['sounds_dict']
+
+    if query.data == 'back_button':
+        # Handle pressing the back button on the first level
+        keyboard = []
+
+        for group in sounds_dict:
+            keyboard.append([InlineKeyboardButton(group['title'], callback_data=f"group_{group['title']}")])
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text('Bitte wähle eine Kategorie', reply_markup=reply_markup)
+
+    elif query.data.startswith('group_'):
+        # Handles pressing a sound group
+        keyboard = []
+        sounds = []
+
+        # Remove the "group_" from the message
+        group_title = query.data[6:]
+        group_index = 0
+
+        for index, group in enumerate(sounds_dict):
+            if group['title'] == group_title:
+                sounds = group['sounds']
+                group_index = index
+                break
+
+        for index, sound in enumerate(sounds):
+            # We set the level where the sound sits in the json hierarchy as the callback data
+            keyboard.append([InlineKeyboardButton(sound['title'], callback_data=f'{str(group_index)}_{str(index)}')])
+
+        keyboard.append([InlineKeyboardButton('🔙', callback_data='back_button')])
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        query.edit_message_text(text=f'Auswahl: {group_title}', reply_markup=reply_markup)
+
+    else:
+        # Handles pressing one of the sounds
+        hierarchy = query.data.split('_')
+        group_index = int(hierarchy[0])
+        sound_index = int(hierarchy[1])
+
+        sound_url = context.user_data['sounds_dict'][group_index]['sounds'][sound_index]['url']
+
+        query.delete_message()
+        context.bot.send_audio(chat_id=update.effective_message.chat_id, audio=str(sound_url))
+

@@ -1,6 +1,6 @@
 import logging
 from textwrap import dedent
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
 
@@ -10,7 +10,8 @@ from database import setup_database
 from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
-from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO
+from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO, soundboard, \
+    soundboard_button
 
 
 def start_command(update: Update, context: CallbackContext):
@@ -36,6 +37,7 @@ def start_command(update: Update, context: CallbackContext):
     /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
+    /soundboard - Sound Auswahl als Sprachnachricht
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
@@ -139,6 +141,13 @@ def glaskugel_command(update: Update, context: CallbackContext):
     glaskugel(update, context)
 
 
+def soundboard_command(update: Update, context: CallbackContext):
+    """
+    Sends back a markup of soundboard files
+    """
+    soundboard(update, context)
+
+
 def run(bot_token: str):
     """
     Starts the bot
@@ -174,6 +183,8 @@ def run(bot_token: str):
         name='shoutout'
     )
     glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)
+    soundboard_handler = CommandHandler('soundboard', soundboard_command, run_async=True)
+    soundboard_callback_handler = CallbackQueryHandler(soundboard_button)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
@@ -187,6 +198,8 @@ def run(bot_token: str):
     dispatcher.add_handler(episode_handler)
     dispatcher.add_handler(shoutout_handler)
     dispatcher.add_handler(glaskugel_handler)
+    dispatcher.add_handler(soundboard_handler)
+    dispatcher.add_handler(soundboard_callback_handler)
 
     job_queue = dispatcher.job_queue
 
