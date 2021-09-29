@@ -16,26 +16,6 @@ class Meetup:
         self.url = url
 
 
-    # gettter and setter methods
-    def get_name(self):
-        return self.name
-
-    def get_region(self):
-        return self.region
-
-    def get_url(self):
-        return self.url
-
-    def set_name(self, name):
-        self.name = name
-
-    def set_region(self, region):
-        self.region = region
-   
-    def set_url(self, url):
-        self.url = url
-
-
 # variables
 # get json file from website
 url = urllib.request.urlopen("https://einundzwanzig.space/meetups.json")
