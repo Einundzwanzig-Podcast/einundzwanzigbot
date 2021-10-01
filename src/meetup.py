@@ -20,7 +20,7 @@ def show_meetups(update: Update, context: CallbackContext):
 
 
     # get json file from website
-    url = requests.get(f'{config.MEMPOOL_SPACE_URL}/meetups.json', timeout=5)
+    url = requests.get(f'{config.EINUNDZWANZIG_URL}/meetups.json', timeout=5)
     json_string = url.text
 
     # save json file as string
