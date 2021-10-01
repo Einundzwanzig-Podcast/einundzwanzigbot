@@ -7,13 +7,13 @@ from telegram.update import Update
 import config
 
 from database import setup_database
-
 from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
 from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO, soundboard, \
     soundboard_button
 from meetup import show_meetups
+
 
 def start_command(update: Update, context: CallbackContext):
     """
@@ -23,9 +23,7 @@ def start_command(update: Update, context: CallbackContext):
 
     welcome_message = dedent("""
     Hi, ich bin der Einundzwanzig Bot, der offizielle Telegram Bot des Einundzwanzig Bitcoin Podcasts.
-
     Du findest den Podcast bei allen gängigen Podcast Apps, oder unter https://einundzwanzig.space.
-
     Kommandos:
     /taproot - Zeit bis zur Aktivierung von Taproot.
     /fee - Aktuelle Transaktionsgebühren.
@@ -39,10 +37,17 @@ def start_command(update: Update, context: CallbackContext):
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
     /soundboard - Sound Auswahl als Sprachnachricht
-    /meetup - Meetups im DACH Raum
+    /meetup - aktuelle Meetups im DACH Raum
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
+
+
+def taproot_command(update: Update, context: CallbackContext):
+    """
+    Calculates Taproot Activation Statistics
+    """
+    taproot_handle_command(update, context)
 
 
 def fee_command(update: Update, context: CallbackContext):
@@ -143,18 +148,12 @@ def soundboard_command(update: Update, context: CallbackContext):
     soundboard(update, context)
 
 
-def taproot_command(update: Update, context: CallbackContext):
-    """
-    Calculates Taproot Activation Statistics
-    """
-    taproot_handle_command(update, context)
-
-
 def meetup_command(update: Update, context: CallbackContext):
     """
-    show all current meetups
+    Show all current meetups
     """
     show_meetups(update, context)
+
 
 def run(bot_token: str):
     """
@@ -195,7 +194,6 @@ def run(bot_token: str):
     soundboard_callback_handler = CallbackQueryHandler(soundboard_button)
     meetup_handler = CommandHandler('meetup', meetup_command, run_async=True)
 
-
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
     dispatcher.add_handler(fee_handler)
@@ -211,7 +209,6 @@ def run(bot_token: str):
     dispatcher.add_handler(soundboard_handler)
     dispatcher.add_handler(soundboard_callback_handler)
     dispatcher.add_handler(meetup_handler)
-
 
     job_queue = dispatcher.job_queue
 
