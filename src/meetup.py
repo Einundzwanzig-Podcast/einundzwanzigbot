@@ -21,7 +21,7 @@ def show_meetups(update: Update, context: CallbackContext):
 
     # get json file from website
     url = requests.get(f'{config.MEMPOOL_SPACE_URL}/meetups.json', timeout=5)
-    json_string = url.json
+    json_string = url.text
 
     # save json file as string
     json_string = str(json_string)
@@ -43,56 +43,40 @@ def show_meetups(update: Update, context: CallbackContext):
     json_string = json_string.replace('"', '')
     json_string = json_string.replace("'", '')
 
-    # get meetup names, regions and urls
-    # need to use other strings, because String gets splited later
-    n1 = 'name: '
-    n2 = ', region: '
+    # create lists to store all names, regions and url of all meetups
+    meetup_name_list : str = []
+    meetup_region_list : str = []
+    meetup_url_list : str = []
 
-    r1 = 'region: '
-    r2 = ', url: '
-
-    url1 = 'url: '
-    url2 = ', name: '
-
-    # create String Arrays to save meetups
-    name_list : str = []
-    region_list : str = []
-    url_list : str = []
-
-    # store values for lists temporary in result
-    result = ''
-
-    #meetup String collects all meetup data out of the 3 lists and stores the result
-    meetup_string : str = ''
-
-    # use a for loop to fill the lists with values,
-    # for loop needs to run as often as count
-    for x in range(count):
+    # get a new String Array to access meetup names, regions and urls via index
+    json_string = json_string.splitlines()
     
-        # add values to the lists
-        result = json_string.split(n1)[1].split(n2)[0]
-        name_list.append(result)
-        meetup_string = meetup_string + 'Name: ' + result + '\n'
+    # lines/index of the first meetup
+    name_index = 2
+    region_index = 3
+    url_index = 4
 
-        result = json_string.split(r1)[1].split(r2)[0]
-        region_list.append(result)
-        meetup_string = meetup_string + 'Region: ' + result + '\n'
-        print('add region_list value ' + result)
+    # stores the message
+    meetup_string = ''
 
-        result = json_string.split(url1)[1].split(url2)[0]
-        url_list.append(result)
-        meetup_string = meetup_string + 'URL: ' + result + '\n' + '\n'
+    # loop through all meetups and add them to the message
+    for x in range(count):
+
+        # add values to lists and remove leading spaces,
+        # remove last char for region and name (last char is always ",")
+        meetup_name_list.append(json_string[name_index].lstrip()[:-1])
+        name_index = name_index + 5
+        meetup_string = meetup_string + meetup_name_list[x] + '\n'
+
+        meetup_region_list.append(json_string[region_index].lstrip()[:-1])
+        region_index = region_index + 5
+        meetup_string = meetup_string + meetup_region_list[x] + '\n'
+
+        meetup_url_list.append(json_string[url_index].lstrip())
+        url_index = url_index + 5
+        meetup_string = meetup_string + meetup_url_list[x] + '\n' + '\n'
         
-        
-        if x == 0:
-            length : int = len(name_list[x]) + len(region_list[x]) + len(url_list[x]) + 23
-        else:
-            n1 = ', name: '
-            length : int = len(name_list[x]) + len(region_list[x]) + len(url_list[x]) + 25
-        
-        # trim string until all used meetups are no longer included
-        for y in range(length):
-            json_string = json_string[:0] + json_string[0 + 1:]
+            
 
     context.bot.send_message(chat_id=update.message.chat_id, text=meetup_string)
 
