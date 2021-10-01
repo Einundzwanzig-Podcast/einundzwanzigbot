@@ -94,8 +94,7 @@ def show_meetups(update: Update, context: CallbackContext):
         for y in range(length):
             json_string = json_string[:0] + json_string[0 + 1:]
 
-
-        context.bot.send_message(chat_id=update.message.chat_id, text=meetup_string)
+    context.bot.send_message(chat_id=update.message.chat_id, text=meetup_string)
 
 
         
