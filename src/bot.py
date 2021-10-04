@@ -37,7 +37,7 @@ def start_command(update: Update, context: CallbackContext):
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
     /soundboard - Sound Auswahl als Sprachnachricht
-    /meetup - aktuelle Meetups im DACH Raum
+    /meetup - Aktuelle Meetups im DACH Raum
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
