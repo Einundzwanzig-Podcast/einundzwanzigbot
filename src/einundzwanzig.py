@@ -323,7 +323,7 @@ def show_meetups(update: Update, context: CallbackContext):
     # loop through all meetups and add them to the message
     for meetup in meetups:
 
-        meetup_string = meetup_string + (str(meetup_dict[x]) + '\n\n')
+        meetup_string = meetup_string + (str(meetup) + '\n\n')
         
     
     meetup_string = meetup_string.replace('{', '')
