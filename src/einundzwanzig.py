@@ -314,13 +314,11 @@ def show_meetups(update: Update, context: CallbackContext):
   
     meetup_dict = json.loads(meetup_request.text)
 
-    # count meetups
-    meetup_number = len(meetup_dict)
-
-    # stores the message
+   # stores the message
     meetup_string = ''
 
     # loop through all meetups and add them to the message
+    meetups = meetup_dict
     for meetup in meetups:
 
         meetup_string = meetup_string + (str(meetup) + '\n\n')
