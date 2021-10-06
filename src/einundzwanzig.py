@@ -321,7 +321,7 @@ def show_meetups(update: Update, context: CallbackContext):
     meetup_string = ''
 
     # loop through all meetups and add them to the message
-    for x in range(meetup_number):
+    for meetup in meetups:
 
         meetup_string = meetup_string + (str(meetup_dict[x]) + '\n\n')
         
