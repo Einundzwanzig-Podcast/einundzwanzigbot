@@ -11,7 +11,7 @@ from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
 from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
 from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO, soundboard, \
-    soundboard_button
+    soundboard_button, show_meetups
 
 
 def start_command(update: Update, context: CallbackContext):
@@ -38,6 +38,7 @@ def start_command(update: Update, context: CallbackContext):
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
     /soundboard - Sound Auswahl als Sprachnachricht
+    /meetup - Aktuelle Meetups im DACH Raum
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
@@ -148,6 +149,13 @@ def soundboard_command(update: Update, context: CallbackContext):
     soundboard(update, context)
 
 
+def meetup_command(update: Update, context: CallbackContext):
+    """
+    Sends back a message with all currently available meetups
+    """
+    show_meetups(update, context)
+
+
 def run(bot_token: str):
     """
     Starts the bot
@@ -185,6 +193,7 @@ def run(bot_token: str):
     glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)
     soundboard_handler = CommandHandler('soundboard', soundboard_command, run_async=True)
     soundboard_callback_handler = CallbackQueryHandler(soundboard_button)
+    meetup_handler = CommandHandler('meetup', meetup_command, run_async=True)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
@@ -200,6 +209,7 @@ def run(bot_token: str):
     dispatcher.add_handler(glaskugel_handler)
     dispatcher.add_handler(soundboard_handler)
     dispatcher.add_handler(soundboard_callback_handler)
+    dispatcher.add_handler(meetup_handler)
 
     job_queue = dispatcher.job_queue
 
