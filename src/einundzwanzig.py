@@ -313,44 +313,21 @@ def show_meetups(update: Update, context: CallbackContext):
         return
   
     meetup_dict = json.loads(meetup_request.text)
+
     # count meetups
-    # use "{" to count, for each "{" there is one meetup
-    count = 0
-
-    for i in meetup_dict:
-        if i == '{':
-            
-            count = count + 1
-
-    # create lists to store all names, regions and url of all meetups
-    meetup_name_list : str = []
-    meetup_region_list : str = []
-    meetup_url_list : str = []
-  
-    # lines/index of the first meetup
-    name_index = 2
-    region_index = 3
-    url_index = 4
+    meetup_number = len(meetup_dict)
 
     # stores the message
     meetup_string = ''
 
     # loop through all meetups and add them to the message
-    for x in range(count):
+    for x in range(meetup_number):
 
-        # add values to lists and remove leading spaces,
-        # remove last char for region and name (last char is always ",")
-        meetup_name_list.append(meetup_dict[name_index].lstrip()[:-1])
-        name_index = name_index + 5
-        meetup_string = meetup_string + meetup_name_list[x] + '\n'
-
-        meetup_region_list.append(meetup_dict[region_index].lstrip()[:-1])
-        region_index = region_index + 5
-        meetup_string = meetup_string + meetup_region_list[x] + '\n'
-
-        meetup_url_list.append(meetup_dict[url_index].lstrip())
-        url_index = url_index + 5
-        meetup_string = meetup_string + meetup_url_list[x] + '\n' + '\n'
+        meetup_string = meetup_string + (str(meetup_dict[x]) + '\n\n')
         
-            
-    context.bot.send_message(chat_id=update.message.chat_id, text=meetup_string.replace("'", ''))
+    
+    meetup_string = meetup_string.replace('{', '')
+    meetup_string = meetup_string.replace('}', '')
+    meetup_string = meetup_string.replace("'", '')
+    meetup_string = meetup_string.replace('"', '')
+    context.bot.send_message(chat_id=update.message.chat_id, text=meetup_string)
