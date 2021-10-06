@@ -330,4 +330,5 @@ def show_meetups(update: Update, context: CallbackContext):
     meetup_string = meetup_string.replace('}', '')
     meetup_string = meetup_string.replace("'", '')
     meetup_string = meetup_string.replace('"', '')
+    
     context.bot.send_message(chat_id=update.message.chat_id, text=meetup_string)
