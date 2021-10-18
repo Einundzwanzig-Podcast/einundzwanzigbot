@@ -304,6 +304,7 @@ def soundboard_button(update: Update, context: CallbackContext):
         query.delete_message()
         context.bot.send_audio(chat_id=update.effective_message.chat_id, audio=str(sound_url))
 
+
 def show_meetups(update: Update, context: CallbackContext):
 
     try:
@@ -312,21 +313,20 @@ def show_meetups(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.message.chat_id, text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
   
-    meetup_dict = json.loads(meetup_request.text)
-
-   # stores the message
-    meetup_string = ''
+    meetups = json.loads(meetup_request.text)
+    
+    # message send by the bot
+    message = ''
 
     # loop through all meetups and add them to the message
-    meetups = meetup_dict
     for meetup in meetups:
 
-        meetup_string = meetup_string + (str(meetup) + '\n\n')
+        # store names, regions and urls from meetup temporally to append them to the message
+        meetup_name = meetup['name']
+        meetup_region = meetup['region']
+        meetup_url = meetup['url']
+
+        message = message + f'Name: {meetup_name}\nRegion: {meetup_region}\nUrl: {meetup_url}\n\n'
         
     
-    meetup_string = meetup_string.replace('{', '')
-    meetup_string = meetup_string.replace('}', '')
-    meetup_string = meetup_string.replace("'", '')
-    meetup_string = meetup_string.replace('"', '')
-    
-    context.bot.send_message(chat_id=update.message.chat_id, text=meetup_string)
+    context.bot.send_message(chat_id=update.message.chat_id, text=message)
