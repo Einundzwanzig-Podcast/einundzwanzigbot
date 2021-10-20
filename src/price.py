@@ -93,11 +93,13 @@ def preis(update: Update, context: CallbackContext):
 
     price_usd = get_coinbase_price('USD')
     price_eur = get_coinbase_price('EUR')
+    price_chf = get_coinbase_price('CHF')
 
     message = dedent(f"""
     <b>Preis</b>
     {'{0:,.2f}'.format(price_usd)} USD/BTC
     {'{0:,.2f}'.format(price_eur)} EUR/BTC
+    {'{0:,.2f}'.format(price_chf)} CHF/BTC
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
@@ -105,18 +107,21 @@ def preis(update: Update, context: CallbackContext):
 
 def moskauzeit(update: Update, context: CallbackContext):
     """
-    Get the current price in satoshi per USD and satoshi per EUR
+    Get the current price in satoshi per USD, satoshi per EUR and satoshi per CHF
     """
     price_usd = get_coinbase_price('USD')
     price_eur = get_coinbase_price('EUR')
+    price_chf = get_coinbase_price('CHF')
 
     sat_per_usd = int(1 / price_usd * 100_000_000)
     sat_per_eur = int(1 / price_eur * 100_000_000)
+    sat_per_chf = int(1 / price_chf * 100_000_000)
 
     message = dedent(f"""
     <b>Moskau Zeit</b>
     {sat_per_usd} SAT/USD
     {sat_per_eur} SAT/EUR
+    {sat_per_chf} SAT/CHF
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
