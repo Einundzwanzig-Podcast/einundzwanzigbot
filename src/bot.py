@@ -8,7 +8,7 @@ import config
 
 from database import setup_database
 from taproot import taproot_handle_command
-from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees
+from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees, halving
 from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
 from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO, soundboard, \
     soundboard_button
@@ -30,6 +30,7 @@ def start_command(update: Update, context: CallbackContext):
     /fee - Aktuelle Transaktionsgebühren.
     /mempool - Mempool Visualisierung. Ersters Argument ist die Zahl der Mempool Blöcke, max <i>8</i>.
     /preis - Preis in USD, EUR und CHF.
+    /halving - Zeit bis zum nächsten Halving.
     /satineur - <i>satoshis</i> Gibt den EUR Preis der satoshis an.
     /satinusd - <i>satoshis</i> Gibt den USD Preis der satoshis an.
     /satinchf - <i>satoshis</i> Gibt den CHF Preis der satoshis an.
@@ -77,6 +78,13 @@ def preis_command(update: Update, context: CallbackContext):
     Get the current price in USD, EUR and CHF
     """
     preis(update, context)
+
+
+def halving_command(update: Update, context: CallbackContext):
+    """
+    Get the time until the next halving
+    """
+    halving(update, context)
 
 
 def moskauzeit_command(update: Update, context: CallbackContext):
@@ -171,6 +179,7 @@ def run(bot_token: str):
     fee_handler = CommandHandler('fee', fee_command, run_async=True)
     mempool_handler = CommandHandler('mempool', mempool_command, run_async=True)
     preis_handler = CommandHandler('preis', preis_command, run_async=True)
+    halving_handler = CommandHandler('halving', halving_command, run_async=True)
     sat_in_eur_handler = CommandHandler('satineur', sat_in_eur_command, run_async=True)
     sat_in_usd_handler = CommandHandler('satinusd', sat_in_usd_command, run_async=True)
     sat_in_chf_handler = CommandHandler('satinchf', sat_in_chf_command, run_async=True)
@@ -198,6 +207,7 @@ def run(bot_token: str):
     dispatcher.add_handler(fee_handler)
     dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(preis_handler)
+    dispatcher.add_handler(halving_handler)
     dispatcher.add_handler(sat_in_eur_handler)
     dispatcher.add_handler(sat_in_usd_handler)
     dispatcher.add_handler(sat_in_chf_handler)

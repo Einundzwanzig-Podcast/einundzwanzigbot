@@ -1,4 +1,7 @@
+import datetime
+import pytz
 import requests
+import math
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
 from textwrap import dedent
@@ -123,6 +126,46 @@ def blockzeit(update: Update, context: CallbackContext):
     message = dedent(f"""
     <b>Aktuelle Blockzeit</b>
     {height}
+    """)
+
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+
+
+def halving(update: Update, context: CallbackContext):
+    """
+    Returns the time until the next halving
+    """
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height', timeout=5)
+        current_block_height = r.json()
+    except:
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+
+    blocks_till_next_halving = 210_000 - current_block_height % 210_000
+
+    minutes_till_next_halving = 10 * blocks_till_next_halving
+    time_till_next_halving = datetime.timedelta(minutes=minutes_till_next_halving)
+
+    now = datetime.datetime.now(pytz.timezone("Europe/Berlin"))
+    time_of_next_halving = now + time_till_next_halving
+
+    next_halving_block_height = (math.floor(current_block_height / 210_000) + 1) * 210_000
+
+    current_block_reward = 50 / 2 ** math.floor(current_block_height / 210_000)
+    next_block_reward = current_block_reward / 2
+
+    message = dedent(f"""
+    <b>Halving</b>
+    Nächstes Halving bei Block: <i>{next_halving_block_height}</i>
+    Aktueller Block: <i>{current_block_height}</i>
+    Blöcke bis zum nächsten Halving: <i>{blocks_till_next_halving}</i>
+    Aktuelle Block Subsidy: <i>{current_block_reward:g} BTC</i>
+    Nächste Block Subsidy: <i>{next_block_reward:g} BTC</i>
+    
+    Geschätztes Datum des nächsten Halvings: <i>{time_of_next_halving.strftime('%d.%m.%Y %H:%M CEST')}</i>
+    Geschätzte Zeit bis zum nächsten Halving: <i>{time_till_next_halving.days} Tage {time_till_next_halving.seconds / 60 / 60:.0f} Stunden</i>
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
