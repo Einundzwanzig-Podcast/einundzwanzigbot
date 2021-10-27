@@ -5,6 +5,7 @@ from telegram.ext.callbackcontext import CallbackContext
 from textwrap import dedent
 from telegram.update import Update
 import datetime
+import pytz
 
 import config
 
@@ -304,7 +305,7 @@ def taproot_handle_command(update: Update, context: CallbackContext):
     minutes_till_activation = blocks_till_activation * 10
 
     time_till_activation = datetime.timedelta(minutes=minutes_till_activation)
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(pytz.timezone("Europe/Berlin"))
     time_of_activation = now + time_till_activation
 
     message = dedent(f"""
@@ -315,7 +316,7 @@ def taproot_handle_command(update: Update, context: CallbackContext):
     Aktueller Block: <i>{current_block_height}</i>
     Blöcke bis zur Aktivierung: <i>{blocks_till_activation}</i>
 
-    Geschätztes Datum der Aktivierung: <i>{time_of_activation.strftime('%d.%m.%Y %H:%M UTC')}</i>
+    Geschätztes Datum der Aktivierung: <i>{time_of_activation.strftime('%d.%m.%Y %H:%M CEST')}</i>
     Geschätzte Zeit bis zur Aktivierung: <i>{time_till_activation.days} Tage {time_till_activation.seconds / 60 / 60:.0f} Stunden</i>
     """)
 
