@@ -8,13 +8,13 @@ import os
 import config
 
 
-def get_coinbase_price(fiat: str = 'USD') -> float:
+def get_coinbase_prices():
     """
-    Get the current BTC-USD spot exchange rate
+    Get the current fiat exchange rates for BTC from the coinbase API
     """
-    r = requests.get(f'https://api.coinbase.com/v2/prices/spot?currency={fiat}', timeout=5)
+    r = requests.get('https://api.coinbase.com/v2/exchange-rates?currency=BTC', timeout=5)
     json = r.json()
-    return float(json['data']['amount'])
+    return json['data']['rates']
 
 
 def get_last_ath_price_and_message_id() -> Tuple[float, int]:
@@ -56,7 +56,7 @@ def price_update_ath(context: CallbackContext) -> None:
     sends a message if a new ATH was reached
     """
     try:
-        price = get_coinbase_price()
+        price = float(get_coinbase_prices()['USD'])
     except:
         price = 0.0
 
@@ -91,9 +91,11 @@ def preis(update: Update, context: CallbackContext):
     Current Coinbase price
     """
 
-    price_usd = get_coinbase_price('USD')
-    price_eur = get_coinbase_price('EUR')
-    price_chf = get_coinbase_price('CHF')
+    prices = get_coinbase_prices()
+
+    price_usd = float(prices['USD'])
+    price_eur = float(prices['EUR'])
+    price_chf = float(prices['CHF'])
 
     message = dedent(f"""
     <b>Preis</b>
@@ -109,9 +111,11 @@ def moskauzeit(update: Update, context: CallbackContext):
     """
     Get the current price in satoshi per USD, satoshi per EUR and satoshi per CHF
     """
-    price_usd = get_coinbase_price('USD')
-    price_eur = get_coinbase_price('EUR')
-    price_chf = get_coinbase_price('CHF')
+    prices = get_coinbase_prices()
+
+    price_usd = float(prices['USD'])
+    price_eur = float(prices['EUR'])
+    price_chf = float(prices['CHF'])
 
     sat_per_usd = int(1 / price_usd * 100_000_000)
     sat_per_eur = int(1 / price_eur * 100_000_000)
@@ -127,7 +131,7 @@ def moskauzeit(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
 
 
-def sat_in_fiat(update: Update, context: CallbackContext, fiat: str):
+def sat_in_fiat(update: Update, context: CallbackContext):
     """
     Get the current fiat value of your sat amount
     """
@@ -137,11 +141,16 @@ def sat_in_fiat(update: Update, context: CallbackContext, fiat: str):
     except:
         sats_amount = 10000
 
-    price = get_coinbase_price(fiat)
-    sats_in_eur = price / 100_000_000 * sats_amount
+    prices = get_coinbase_prices()
+
+    sats_in_usd = float(prices['USD']) / 100_000_000 * sats_amount
+    sats_in_eur = float(prices['EUR']) / 100_000_000 * sats_amount
+    sats_in_chf = float(prices['CHF']) / 100_000_000 * sats_amount
 
     message = dedent(f"""
-    {'{0:,.0f}'.format(sats_amount)} sats = {'{0:,.2f}'.format(sats_in_eur)} {fiat}
+    {'{0:,.0f}'.format(sats_amount)} sats = {'{0:,.2f}'.format(sats_in_usd)} USD
+    {'{0:,.0f}'.format(sats_amount)} sats = {'{0:,.2f}'.format(sats_in_eur)} EUR
+    {'{0:,.0f}'.format(sats_amount)} sats = {'{0:,.2f}'.format(sats_in_chf)} CHF
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
