@@ -161,6 +161,7 @@ def halving(update: Update, context: CallbackContext):
     Nächstes Halving bei Block: <i>{next_halving_block_height}</i>
     Aktueller Block: <i>{current_block_height}</i>
     Blöcke bis zum nächsten Halving: <i>{blocks_till_next_halving}</i>
+    
     Aktuelle Block Subsidy: <i>{current_block_reward:g} BTC</i>
     Nächste Block Subsidy: <i>{next_block_reward:g} BTC</i>
     
