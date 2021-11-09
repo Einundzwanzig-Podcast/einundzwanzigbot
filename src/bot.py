@@ -31,9 +31,7 @@ def start_command(update: Update, context: CallbackContext):
     /mempool - Mempool Visualisierung. Ersters Argument ist die Zahl der Mempool Blöcke, max <i>8</i>.
     /preis - Preis in USD, EUR und CHF.
     /halving - Zeit bis zum nächsten Halving.
-    /satineur - <i>satoshis</i> Gibt den EUR Preis der satoshis an.
-    /satinusd - <i>satoshis</i> Gibt den USD Preis der satoshis an.
-    /satinchf - <i>satoshis</i> Gibt den CHF Preis der satoshis an.
+    /satinfiat - <i>satoshis</i> Gibt den Fiat Preis der satoshis in USD, EUR und CHF an.
     /blockzeit - Aktuelle Blockzeit.
     /moskauzeit - SAT per USD, SAT per EUR und SAT per CHF.
     /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
@@ -94,24 +92,11 @@ def moskauzeit_command(update: Update, context: CallbackContext):
     moskauzeit(update, context)
 
 
-def sat_in_eur_command(update: Update, context: CallbackContext):
+def sat_in_fiat_command(update: Update, context: CallbackContext):
     """
     Get the current EUR value of your sat amount
     """
-    sat_in_fiat(update, context, fiat='EUR')
-
-
-def sat_in_usd_command(update: Update, context: CallbackContext):
-    """
-    Get the current USD value of your sat amount
-    """
-    sat_in_fiat(update, context, fiat='USD')
-
-def sat_in_chf_command(update: Update, context: CallbackContext):
-    """
-    Get the current CHF value of your sat amount
-    """
-    sat_in_fiat(update, context, fiat='CHF')
+    sat_in_fiat(update, context)
 
 def episode_command(update: Update, context: CallbackContext):
     """
@@ -180,9 +165,7 @@ def run(bot_token: str):
     mempool_handler = CommandHandler('mempool', mempool_command, run_async=True)
     preis_handler = CommandHandler('preis', preis_command, run_async=True)
     halving_handler = CommandHandler('halving', halving_command, run_async=True)
-    sat_in_eur_handler = CommandHandler('satineur', sat_in_eur_command, run_async=True)
-    sat_in_usd_handler = CommandHandler('satinusd', sat_in_usd_command, run_async=True)
-    sat_in_chf_handler = CommandHandler('satinchf', sat_in_chf_command, run_async=True)
+    sat_in_fiat_handler = CommandHandler('satinfiat', sat_in_fiat_command, run_async=True)
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
     episode_handler = CommandHandler('episode', episode_command, run_async=True)
@@ -208,9 +191,7 @@ def run(bot_token: str):
     dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(preis_handler)
     dispatcher.add_handler(halving_handler)
-    dispatcher.add_handler(sat_in_eur_handler)
-    dispatcher.add_handler(sat_in_usd_handler)
-    dispatcher.add_handler(sat_in_chf_handler)
+    dispatcher.add_handler(sat_in_fiat_handler)
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
     dispatcher.add_handler(episode_handler)
