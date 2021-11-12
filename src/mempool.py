@@ -165,7 +165,7 @@ def halving(update: Update, context: CallbackContext):
     Aktuelle Block Subsidy: <i>{current_block_reward:g} BTC</i>
     Nächste Block Subsidy: <i>{next_block_reward:g} BTC</i>
     
-    Geschätztes Datum des nächsten Halvings: <i>{time_of_next_halving.strftime('%d.%m.%Y %H:%M CEST')}</i>
+    Geschätztes Datum des nächsten Halvings: <i>{time_of_next_halving.strftime('%d.%m.%Y %H:%M CET')}</i>
     Geschätzte Zeit bis zum nächsten Halving: <i>{time_till_next_halving.days} Tage {time_till_next_halving.seconds / 60 / 60:.0f} Stunden</i>
     """)
 
