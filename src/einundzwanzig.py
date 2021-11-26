@@ -305,7 +305,7 @@ def soundboard_button(update: Update, context: CallbackContext):
         context.bot.send_audio(chat_id=update.effective_message.chat_id, audio=str(sound_url))
 
 
-def show_meetups(update: Update, context: CallbackContext):
+def meetups(update: Update, context: CallbackContext):
 
     try:
         meetup_request = requests.get(f'{config.EINUNDZWANZIG_URL}/meetups.json', timeout=5)
@@ -313,20 +313,44 @@ def show_meetups(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.message.chat_id, text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
   
-    meetups = json.loads(meetup_request.text)
-    
-    # message send by the bot
-    message = ''
+    meetup_dict = json.loads(meetup_request.text)
 
-    # loop through all meetups and add them to the message
-    for meetup in meetups:
+    keyboard = []
 
-        # store names, regions and urls from meetup temporally to append them to the message
-        meetup_name = meetup['name']
-        meetup_region = meetup['region']
-        meetup_url = meetup['url']
+    #remove duplicates from meetup_dict
+    unique = { each['country'] : each for each in meetup_dict }.values()
 
-        message = message + f'Name: {meetup_name}\nRegion: {meetup_region}\nUrl: {meetup_url}\n\n'
-        
-    
-    context.bot.send_message(chat_id=update.message.chat_id, text=message)
+    for group in unique:
+        # Set the callback data to "group_" and then the group name
+        keyboard.append([InlineKeyboardButton(group['country'], callback_data=f"group_{group['country']}")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # We need a reference to the sound dict for use in the callback query
+    context.user_data['meetup_dict'] = meetup_dict
+
+    update.message.reply_text('Bitte wähle ein Land', reply_markup=reply_markup)
+
+
+def meetup_button(update: Update, context: CallbackContext):
+    """ Handles the callback query"""
+
+    query = update.callback_query
+    query.answer()
+
+    meetup_dict = context.user_data['meetup_dict']
+    print(meetup_dict)
+
+    if query.data == 'back_button':
+        # Handle pressing the back button on the first level
+        keyboard = []
+
+        #remove country duplicates from meetup_dict
+        unique = { each['country'] : each for each in meetup_dict }.values()
+
+        for group in unique:
+            # Set the callback data to "group_" and then the group name
+            keyboard.append([InlineKeyboardButton(group['country'], callback_data=f"group_{group['country']}")])
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text('Bitte wähle ein Land', reply_markup=reply_markup)
