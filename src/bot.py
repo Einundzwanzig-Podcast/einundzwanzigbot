@@ -1,5 +1,6 @@
 import logging
 from textwrap import dedent
+from telegram import update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.update import Update
@@ -11,7 +12,7 @@ from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees, halving
 from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
 from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO, soundboard, \
-    soundboard_button
+    soundboard_button, meetups, meetup_button
 
 
 def start_command(update: Update, context: CallbackContext):
@@ -38,6 +39,7 @@ def start_command(update: Update, context: CallbackContext):
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
     /soundboard - Sound Auswahl als Sprachnachricht
+    /meetup - Zeige aktuelle Meetups
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
@@ -98,6 +100,7 @@ def sat_in_fiat_command(update: Update, context: CallbackContext):
     """
     sat_in_fiat(update, context)
 
+
 def episode_command(update: Update, context: CallbackContext):
     """
     Get the most recent podcast episode
@@ -147,6 +150,13 @@ def soundboard_command(update: Update, context: CallbackContext):
     soundboard(update, context)
 
 
+def meetup_command(update: Update, context: CallbackContext):
+    """
+    Sends message with einundzwanzig meetups
+    """
+    meetups(update, context)
+
+
 def run(bot_token: str):
     """
     Starts the bot
@@ -184,6 +194,8 @@ def run(bot_token: str):
     glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)
     soundboard_handler = CommandHandler('soundboard', soundboard_command, run_async=True)
     soundboard_callback_handler = CallbackQueryHandler(soundboard_button)
+    meetup_handler = CommandHandler('meetup', meetup_command, run_async=True)
+    meetup_callback_handler = CallbackQueryHandler(meetup_button)
 
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(taproot_handler)
@@ -199,6 +211,8 @@ def run(bot_token: str):
     dispatcher.add_handler(glaskugel_handler)
     dispatcher.add_handler(soundboard_handler)
     dispatcher.add_handler(soundboard_callback_handler)
+    dispatcher.add_handler(meetup_handler)
+    dispatcher.add_handler(meetup_callback_handler)
 
     job_queue = dispatcher.job_queue
 
