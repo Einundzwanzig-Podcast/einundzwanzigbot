@@ -39,6 +39,7 @@ def start_command(update: Update, context: CallbackContext):
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
     /soundboard - Sound Auswahl als Sprachnachricht
+    /meetup - Zeige aktuelle Meetups
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
@@ -98,6 +99,7 @@ def sat_in_fiat_command(update: Update, context: CallbackContext):
     Get the current EUR value of your sat amount
     """
     sat_in_fiat(update, context)
+
 
 def episode_command(update: Update, context: CallbackContext):
     """
