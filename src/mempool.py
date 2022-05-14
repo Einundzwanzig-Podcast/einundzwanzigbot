@@ -22,7 +22,7 @@ def mempool_space_fees(update: Update, context: CallbackContext):
     try:
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/fees/recommended', timeout=5)
         json = r.json()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
@@ -64,7 +64,7 @@ def mempool_space_mempool_stats(update: Update, context: CallbackContext):
     try:
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/mempool', timeout=5)
         mempool = r.json()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
@@ -72,14 +72,14 @@ def mempool_space_mempool_stats(update: Update, context: CallbackContext):
     try:
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/fees/mempool-blocks', timeout=5)
         blocks = r.json()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
 
     try:
         num_blocks = int(context.args[0])
-    except:
+    except Exception as e:
         num_blocks = 3
 
     if num_blocks <= 0:
@@ -97,7 +97,7 @@ def mempool_space_mempool_stats(update: Update, context: CallbackContext):
         try:
             min_fee = fee_range[0]
             max_fee = fee_range[-1]
-        except:
+        except Exception as e:
             min_fee = 1.0
             max_fee = 1.0
 
@@ -118,7 +118,7 @@ def blockzeit(update: Update, context: CallbackContext):
     try:
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height', timeout=5)
         height = r.json()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
@@ -138,7 +138,7 @@ def halving(update: Update, context: CallbackContext):
     try:
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height', timeout=5)
         current_block_height = r.json()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return

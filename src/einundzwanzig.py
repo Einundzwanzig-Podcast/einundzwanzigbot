@@ -34,7 +34,7 @@ def get_episode(url: str) -> str:
         r = requests.get(config.EINUNDZWANZIG_URL + url, timeout=5)
         doc = BeautifulSoup(r.text, "html.parser")
         return f"{config.EINUNDZWANZIG_URL + doc.select('.plain')[0].get('href')}"
-    except:
+    except Exception as e:
         return "Es kann aktuell keine Verbindung zum Server aufgebaut werden. Schau doch solange auf Spotify vorbei: " \
                "https://open.spotify.com/show/10408JFbE1n8MexfrBv33r "
 
@@ -49,7 +49,7 @@ def episode(update: Update, context: CallbackContext):
             episode_format = str(context.args[0]).lower()
         else:
             episode_format = "alle"
-    except:
+    except Exception as e:
         episode_format = "alle"
 
     if episode_format == "news":
@@ -131,7 +131,7 @@ def memo(update: Update, context: CallbackContext) -> int:
             return SHOUTOUT_AMOUNT
 
         context.user_data['amount'] = sat_amount
-    except:
+    except Exception as e:
         update.message.reply_text(text='Bitte gib eine korrekte Anzahl von sats ein!')
         return SHOUTOUT_AMOUNT
 
@@ -205,7 +205,7 @@ def invoice(update: Update, context: CallbackContext) -> int:
 
         try:
             os.remove(f'{update.effective_chat.id}.png')
-        except:
+        except Exception as e:
             logging.error(f'ERROR: QR-code file {update.effective_chat.id}.png could not be deleted')
 
         return ConversationHandler.END
@@ -230,7 +230,7 @@ def soundboard(update: Update, context: CallbackContext):
 
     try:
         sounds_request = requests.get(f'{config.EINUNDZWANZIG_URL}/sounds.json', timeout=5)
-    except:
+    except Exception as e:
         update.message.reply_text('Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
 
