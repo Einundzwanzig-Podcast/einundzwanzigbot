@@ -41,7 +41,7 @@ def new_miner_signalling(context: CallbackContext, taprootStats: TaprootStats):
     """
     try:
         blocks = fetch_latest_blocks()
-    except:
+    except Exception as e:
         return
 
     new_signalling_miners: List[str] = []
@@ -144,7 +144,7 @@ def taproot_show_blocks(blocks: List, amount: int) -> str:
     try:
         signals_true_percent = block_emojis_last.count('🟩') / (
                 block_emojis_last.count('🟩') + block_emojis_last.count('🟥')) * 100
-    except:
+    except Exception as e:
         signals_true_percent = 0.0
 
     message += dedent(f"""<i>{signals_true_percent:.1f}% dieser signalisieren dafür</i>\n""")
@@ -233,7 +233,7 @@ def taproot_activation_logic(update: Update, context: CallbackContext):
     # are current not signalling
     try:
         show_non_signalling_mining_pools = True if context.args[0] == 'all' else False
-    except:
+    except Exception as e:
         show_non_signalling_mining_pools = False
 
     # If the argument 'blocks' is provided, you will get all the latest blocks, but no
@@ -249,14 +249,14 @@ def taproot_activation_logic(update: Update, context: CallbackContext):
                 # Filter out invalid amounts
                 if show_only_blocks_amount < 1 or show_only_blocks_amount > 2016:
                     show_only_blocks_amount = 144
-        except:
+        except Exception as e:
             show_only_blocks_amount = 144
-    except:
+    except Exception as e:
         show_only_blocks = False
 
     try:
         blocks = fetch_latest_blocks()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Taproot Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
@@ -286,7 +286,7 @@ def taproot_handle_command(update: Update, context: CallbackContext):
     try:
         r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/blocks/tip/height', timeout=5)
         current_block_height = r.json()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Server nicht verfügbar. Bitte später nochmal versuchen!')
         return
@@ -335,12 +335,12 @@ def taproot_blocks_handle_command(update: Update, context: CallbackContext):
             number_of_blocks = int(context.args[0])
             if number_of_blocks < 1 or number_of_blocks > 2016:
                 number_of_blocks = 144
-    except:
+    except Exception as e:
         number_of_blocks = 144
 
     try:
         blocks = fetch_latest_blocks()
-    except:
+    except Exception as e:
         context.bot.send_message(chat_id=update.message.chat_id,
                                  text='Taproot Server nicht verfügbar. Bitte später nochmal versuchen!')
         return

@@ -57,7 +57,7 @@ def price_update_ath(context: CallbackContext) -> None:
     """
     try:
         price = float(get_coinbase_prices()['USD'])
-    except:
+    except Exception as e:
         price = 0.0
 
     (last_ath_price, last_message_id) = get_last_ath_price_and_message_id()
@@ -78,7 +78,7 @@ def price_update_ath(context: CallbackContext) -> None:
         # This only works if the message is less than 48 hours old
         try:
             context.bot.delete_message(chat_id=config.FEATURE_ATH_CHAT_ID, message_id=last_message_id)
-        except:
+        except Exception as e:
             pass
 
         sent_message = context.bot.send_message(text=message, chat_id=config.FEATURE_ATH_CHAT_ID, parse_mode='HTML')
@@ -138,7 +138,7 @@ def sat_in_fiat(update: Update, context: CallbackContext):
 
     try:
         sats_amount = int(context.args[0])
-    except:
+    except Exception as e:
         sats_amount = 10000
 
     prices = get_coinbase_prices()
