@@ -10,7 +10,7 @@ import config
 
 def get_coinbase_prices():
     """
-    Get the current fiat exchange rates for BTC from the coinbase API
+    Get the current fiat exchange rates for BTC from the Coinbase API
     """
     r = requests.get('https://api.coinbase.com/v2/exchange-rates?currency=BTC', timeout=5)
     json = r.json()
