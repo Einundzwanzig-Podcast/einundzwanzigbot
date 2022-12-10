@@ -170,3 +170,81 @@ def halving(update: Update, context: CallbackContext):
     """)
 
     context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+
+
+def difficulty(update: Update, context: CallbackContext):
+    """
+    Returns information about the next difficulty adjustment
+    """
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/difficulty-adjustment', timeout=5)
+        difficulty_json = r.json()
+        difficulty_progress_percent = round(difficulty_json['progressPercent'], 2)
+        difficulty_difficulty_change = round(difficulty_json['difficultyChange'], 2)
+        difficulty_previous_retarget = round(difficulty_json['previousRetarget'], 2)
+        difficulty_remaining_blocks = int(difficulty_json['remainingBlocks'])
+        difficulty_remaining_days = int(difficulty_remaining_blocks/144)
+        difficulty_next_retarget_height = int(difficulty_json['nextRetargetHeight'])
+
+    except Exception as e:
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+
+    message = dedent(f"""
+    <b>Nächste Schwierigkeitsanpassung</b>
+    {difficulty_emoji(difficulty_difficulty_change)} Schätzung: <i>{difficulty_difficulty_change} %</i>
+    {difficulty_emoji(difficulty_previous_retarget)} Vorherige Anpassung: <i>{difficulty_previous_retarget} %</i>
+
+    Laufende Periode: <i>{difficulty_progress_percent} %</i>
+    Verbleibende Blöcke: <i>{difficulty_remaining_blocks} (ca. {difficulty_remaining_days} Tage)</i>
+    Anpassung bei Block: <i>{difficulty_next_retarget_height} </i>
+
+
+    Zur aktuellen Hashrate siehe /hashrate.
+    """)
+
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
+
+
+def difficulty_emoji(difficulty_change: float) -> str:
+    """
+    Returns an emoji depending on the difficulty change
+    """
+    if difficulty_change < 0:
+        return '🟥'
+    if difficulty_change > 0:
+        return '🟩'
+
+
+def hashrate(update: Update, context: CallbackContext):
+    """
+    Returns information about current hashrate
+    """
+    try:
+        r = requests.get(f'{config.MEMPOOL_SPACE_URL}/api/v1/mining/hashrate/3d', timeout=5)
+
+        hash_rate_average = r.json()['hashrates']
+        hash_rate_average = sum([n['avgHashrate'] for n in hash_rate_average]) / 3
+        hash_rate_average_ehs = int(hash_rate_average / (10**18))
+        current_hashrate = int(r.json()['currentHashrate'])
+        current_hashrate_ehs = int(current_hashrate / (10**18))
+
+        difficulty_int = int(r.json()['currentDifficulty'])
+        diff_T = round((difficulty_int / (10**12)), 2)
+
+    except Exception as e:
+        context.bot.send_message(chat_id=update.message.chat_id,
+                                 text='Server nicht verfügbar. Bitte später nochmal versuchen!')
+        return
+
+    message = dedent(f"""
+    <b>Hashrate</b>
+    Durchschnittliche Hashrate der letzten drei Tage:  <i>{hash_rate_average_ehs} EH/s</i>. 
+    Aktuelle Hashrate: <i>{current_hashrate_ehs} EH/s</i>.
+    Aktuelle Schwierigkeit: <i>{diff_T} T</i>.
+
+    Zur Schwierigkeitsanpassung siehe /difficulty.
+    """)
+
+    context.bot.send_message(chat_id=update.message.chat_id, text=message, parse_mode='HTML')
