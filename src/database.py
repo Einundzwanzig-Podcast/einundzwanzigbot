@@ -18,18 +18,6 @@ def setup_database():
 
     # database setup
     con = sqlite3.connect(SQLITE_DB_PATH)
-    cur = con.cursor()
-
-    # setup tables
-
-    # ATH PRICE TABLE
-    cur.execute('CREATE TABLE IF NOT EXISTS price (price_usd REAL, last_message_id INTEGER)')
-
-    first_entry = cur.execute('SELECT * FROM price').fetchone()
-
-    if first_entry is None and config.FEATURE_ATH_MANUAL_LAST_ATH != 0:
-        cur.execute('INSERT INTO price (price_usd, last_message_id) VALUES (?, 0)',
-                    (config.FEATURE_ATH_MANUAL_LAST_ATH,))
 
     con.commit()
     con.close()

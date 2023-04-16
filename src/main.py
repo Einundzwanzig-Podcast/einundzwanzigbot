@@ -31,21 +31,6 @@ def main():
         # Use default defined in config
         pass
 
-    try:
-        config.FEATURE_ATH = True if str.lower(os.environ['FEATURE_ATH']) == 'true' else False
-        if config.FEATURE_ATH:
-            try:
-                config.FEATURE_ATH_CHAT_ID = int(os.environ['FEATURE_ATH_CHAT_ID'])
-            except KeyError:
-                pass
-            try:
-                config.FEATURE_ATH_MANUAL_LAST_ATH = float(os.environ['FEATURE_ATH_MANUAL_LAST_ATH'])
-            except KeyError:
-                pass
-    except KeyError:
-        # Use default defined in config
-        pass
-
     run(bot_token)
 
 

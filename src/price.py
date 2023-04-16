@@ -50,42 +50,6 @@ def save_price_to_db(price: float, last_message_id: int) -> None:
     connection.close()
 
 
-def price_update_ath(context: CallbackContext) -> None:
-    """
-    Gets the current price, compares it to the price in the database and
-    sends a message if a new ATH was reached
-    """
-    try:
-        price = float(get_coinbase_prices()['USD'])
-    except Exception as e:
-        price = 0.0
-
-    (last_ath_price, last_message_id) = get_last_ath_price_and_message_id()
-
-    new_ath = last_ath_price < price
-
-    if not new_ath:
-        return
-    else:
-        price_formatted = '{0:,.2f}'.format(price)
-
-        message = dedent(f"""
-        <b>Neues Allzeithoch</b>
-        {price_formatted} USD
-        """)
-
-        # We try to delete the old message
-        # This only works if the message is less than 48 hours old
-        try:
-            context.bot.delete_message(chat_id=config.FEATURE_ATH_CHAT_ID, message_id=last_message_id)
-        except Exception as e:
-            pass
-
-        sent_message = context.bot.send_message(text=message, chat_id=config.FEATURE_ATH_CHAT_ID, parse_mode='HTML')
-
-        save_price_to_db(price, sent_message.message_id)
-
-
 def preis(update: Update, context: CallbackContext):
     """
     Current Coinbase price

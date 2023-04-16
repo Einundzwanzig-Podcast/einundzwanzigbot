@@ -7,9 +7,8 @@ from telegram.update import Update
 import config
 
 from database import setup_database
-from taproot import taproot_handle_command
 from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees, halving, difficulty, hashrate
-from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
+from price import glaskugel, moskauzeit, preis, sat_in_fiat
 from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO, soundboard, \
     soundboard_button
 
@@ -26,7 +25,6 @@ def start_command(update: Update, context: CallbackContext):
     Du findest den Podcast bei allen gängigen Podcast Apps, oder unter https://einundzwanzig.space.
 
     Kommandos:
-    /taproot - Zeit bis zur Aktivierung von Taproot.
     /fee - Aktuelle Transaktionsgebühren.
     /mempool - Mempool Visualisierung. Ersters Argument ist die Zahl der Mempool Blöcke, max <i>8</i>.
     /preis - Preis in USD, EUR und CHF.
@@ -37,19 +35,11 @@ def start_command(update: Update, context: CallbackContext):
     /hashrate - Aktuelle Hashes im Netzwerk. 
     /moskauzeit - SAT per USD, SAT per EUR und SAT per CHF.
     /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
-    /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
     /glaskugel - Preis Vorhersage
     /soundboard - Sound Auswahl als Sprachnachricht
     """)
 
     update.message.reply_text(text=welcome_message, parse_mode='HTML', disable_web_page_preview=True)
-
-
-def taproot_command(update: Update, context: CallbackContext):
-    """
-    Calculates Taproot Activation Statistics
-    """
-    taproot_handle_command(update, context)
 
 
 def fee_command(update: Update, context: CallbackContext):
@@ -176,7 +166,6 @@ def run(bot_token: str):
     dispatcher = updater.dispatcher
 
     start_handler = CommandHandler('start', start_command, run_async=True)
-    taproot_handler = CommandHandler('taproot', taproot_command, run_async=True)
     fee_handler = CommandHandler('fee', fee_command, run_async=True)
     mempool_handler = CommandHandler('mempool', mempool_command, run_async=True)
     preis_handler = CommandHandler('preis', preis_command, run_async=True)
@@ -187,24 +176,23 @@ def run(bot_token: str):
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
     episode_handler = CommandHandler('episode', episode_command, run_async=True)
-    shoutout_handler = ConversationHandler(
-        entry_points=[CommandHandler('shoutout', shoutout_command)],
-        states={
-            SHOUTOUT_AMOUNT: [MessageHandler(Filters.text & ~Filters.command, memo_command)],
-            SHOUTOUT_MEMO: [MessageHandler(Filters.text & ~Filters.command, invoice_command)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel_command)],
-        run_async=True,
-        allow_reentry=True,
-        conversation_timeout=60 * 20,  # 20 minutes
-        name='shoutout'
-    )
+    # shoutout_handler = ConversationHandler(
+    #     entry_points=[CommandHandler('shoutout', shoutout_command)],
+    #     states={
+    #         SHOUTOUT_AMOUNT: [MessageHandler(Filters.text & ~Filters.command, memo_command)],
+    #         SHOUTOUT_MEMO: [MessageHandler(Filters.text & ~Filters.command, invoice_command)]
+    #     },
+    #     fallbacks=[CommandHandler('cancel', cancel_command)],
+    #     run_async=True,
+    #     allow_reentry=True,
+    #     conversation_timeout=60 * 20,  # 20 minutes
+    #     name='shoutout'
+    # )
     glaskugel_handler = CommandHandler('glaskugel', glaskugel_command, run_async=True)
     soundboard_handler = CommandHandler('soundboard', soundboard_command, run_async=True)
     soundboard_callback_handler = CallbackQueryHandler(soundboard_button)
 
     dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(taproot_handler)
     dispatcher.add_handler(fee_handler)
     dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(preis_handler)
@@ -215,15 +203,10 @@ def run(bot_token: str):
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
     dispatcher.add_handler(episode_handler)
-    dispatcher.add_handler(shoutout_handler)
+    # dispatcher.add_handler(shoutout_handler)
     dispatcher.add_handler(glaskugel_handler)
     dispatcher.add_handler(soundboard_handler)
     dispatcher.add_handler(soundboard_callback_handler)
-
-    job_queue = dispatcher.job_queue
-
-    if config.FEATURE_ATH:
-        job_queue.run_repeating(price_update_ath, 10)
 
     if config.USE_WEBHOOK:
         updater.start_webhook(
