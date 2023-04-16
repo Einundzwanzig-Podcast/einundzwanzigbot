@@ -8,7 +8,7 @@ import config
 
 from database import setup_database
 from taproot import taproot_handle_command
-from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees, halving
+from mempool import blockzeit, mempool_space_mempool_stats, mempool_space_fees, halving, difficulty, hashrate
 from price import glaskugel, moskauzeit, preis, price_update_ath, sat_in_fiat
 from einundzwanzig import episode, shoutout, memo, invoice, cancel, SHOUTOUT_AMOUNT, SHOUTOUT_MEMO, soundboard, \
     soundboard_button
@@ -33,6 +33,8 @@ def start_command(update: Update, context: CallbackContext):
     /halving - Zeit bis zum nächsten Halving.
     /satinfiat - <i>satoshis</i> Gibt den Fiat Preis der satoshis in USD, EUR und CHF an.
     /blockzeit - Aktuelle Blockzeit.
+    /difficulty - Aktuelle Schwierigkeitsanpassungen.
+    /hashrate - Aktuelle Hashes im Netzwerk. 
     /moskauzeit - SAT per USD, SAT per EUR und SAT per CHF.
     /episode - <i>typ</i> Link zu der letzten Podcast Episode (Alle, Interviews, Lesestunde, News, Weg)
     /shoutout - LN Invoice für einen Shoutout (Ab 21000 sats vorgelesen im Podcast)
@@ -83,6 +85,20 @@ def halving_command(update: Update, context: CallbackContext):
     Get the time until the next halving
     """
     halving(update, context)
+
+
+def difficulty_command(update: Update, context: CallbackContext):
+    """
+    Get the next difficulty adjustments
+    """
+    difficulty(update, context)
+
+
+def hashrate_command(update: Update, context: CallbackContext):
+    """
+    Get the current hashrate
+    """
+    hashrate(update, context)
 
 
 def moskauzeit_command(update: Update, context: CallbackContext):
@@ -165,6 +181,8 @@ def run(bot_token: str):
     mempool_handler = CommandHandler('mempool', mempool_command, run_async=True)
     preis_handler = CommandHandler('preis', preis_command, run_async=True)
     halving_handler = CommandHandler('halving', halving_command, run_async=True)
+    difficulty_handler = CommandHandler('difficulty', difficulty_command, run_async=True)
+    hashrate_handler = CommandHandler('hashrate', hashrate_command, run_async=True)
     sat_in_fiat_handler = CommandHandler('satinfiat', sat_in_fiat_command, run_async=True)
     blockzeit_handler = CommandHandler('blockzeit', blockzeit_command, run_async=True)
     moskauzeit_handler = CommandHandler('moskauzeit', moskauzeit_command, run_async=True)
@@ -191,6 +209,8 @@ def run(bot_token: str):
     dispatcher.add_handler(mempool_handler)
     dispatcher.add_handler(preis_handler)
     dispatcher.add_handler(halving_handler)
+    dispatcher.add_handler(difficulty_handler)
+    dispatcher.add_handler(hashrate_handler)
     dispatcher.add_handler(sat_in_fiat_handler)
     dispatcher.add_handler(blockzeit_handler)
     dispatcher.add_handler(moskauzeit_handler)
